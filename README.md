@@ -1,7 +1,7 @@
 Narwhal
 =======
 
-A simple JDBC wrapper library
+Simple JDBC wrapper library
 -----------------------------
 
 Narwhal is a cross-platform JDBC wrapper library that provides a convenient way to access to the relational databases.
