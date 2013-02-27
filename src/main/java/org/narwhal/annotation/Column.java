@@ -21,4 +21,6 @@ public @interface Column {
      * @return Database column name.
      * */
     String value();
+
+    boolean primaryKey() default false;
 }

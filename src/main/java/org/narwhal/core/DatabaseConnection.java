@@ -75,6 +75,7 @@ public class DatabaseConnection {
 
         private Constructor<T> constructor;
         private List<Method> setMethods;
+        private List<Method> getMethods;
         private List<String> columns;
         private Map<Character, String> queries;
 
@@ -91,6 +92,7 @@ public class DatabaseConnection {
             List<Field> annotatedFields = getAnnotatedFields(mappedClass, Column.class);
             constructor = mappedClass.getConstructor();
             setMethods = getSetMethods(mappedClass, annotatedFields);
+            getMethods = getGetMethods(mappedClass, annotatedFields);
             columns = getColumnsName(annotatedFields);
             queries = getQueries(mappedClass);
         }
@@ -102,6 +104,10 @@ public class DatabaseConnection {
          * */
         public List<Method> getSetMethods() {
             return setMethods;
+        }
+
+        public List<Method> getGetMethods() {
+            return getMethods;
         }
 
         /**
@@ -205,6 +211,21 @@ public class DatabaseConnection {
                 Method method = mappedClass.getMethod(methodName, field.getType());
 
                 methods.add(method);
+            }
+
+            return methods;
+        }
+
+        private <T> List<Method> getGetMethods(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
+            List<Method> methods = new ArrayList<Method>();
+
+            for (Field field : fields) {
+                if (!field.getAnnotation(Column.class).primaryKey()) {
+                    String methodName = getGetMethodName(field.getName());
+                    Method method = mappedClass.getMethod(methodName, field.getType());
+
+                    methods.add(method);
+                }
             }
 
             return methods;
