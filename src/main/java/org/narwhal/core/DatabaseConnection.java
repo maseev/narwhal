@@ -98,7 +98,7 @@ public class DatabaseConnection {
             primaryKeyGetMethod = getPrimaryKeyMethod(mappedClass, annotatedFields);
             columns = getColumnsName(annotatedFields);
             primaryColumnName = getPrimaryKeyColumnName(mappedClass, annotatedFields);
-            queries = getQueries(mappedClass);
+            queries = createQueries(mappedClass);
         }
 
         /**
@@ -258,7 +258,7 @@ public class DatabaseConnection {
                     " doesn't have a field that was annotated by " + Column.class + " annotation with primaryKey = true");
         }
 
-        private <T> Map<Character, String> getQueries(Class<T> mappedClass) {
+        private <T> Map<Character, String> createQueries(Class<T> mappedClass) {
             String tableName = getTableName(mappedClass);
             Map<Character, String> queries = new HashMap<Character, String>();
 
@@ -415,7 +415,7 @@ public class DatabaseConnection {
     }
 
     public int persist(Object object) {
-        "INSERT INTO <Table name> (columns name) VALUES ()"
+
     }
 
     public int remove(Object object) {
@@ -603,7 +603,7 @@ public class DatabaseConnection {
      * */
      public void connect(DatabaseInformation databaseInformation) throws SQLException, ClassNotFoundException {
         connection = getConnection(databaseInformation);
-    }
+     }
 
     /**
      * Closes database connection.
@@ -632,6 +632,26 @@ public class DatabaseConnection {
      * */
     public Connection getRawConnection() {
         return connection;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object[] getParameters(Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        List<Object> parameters = new ArrayList<Object>();
+
+        MappedClassInformation classInformation = null;
+        if (cache.containsKey(object.getClass())) {
+            classInformation = cache.get(object.getClass());
+        } else {
+            classInformation = new MappedClassInformation(object.getClass());
+        }
+
+        List<Method> getMethods = classInformation.getGetMethods();
+
+        for (Method method : getMethods) {
+            parameters.add(method.invoke(object));
+        }
+
+        return parameters.toArray();
     }
 
     /**
