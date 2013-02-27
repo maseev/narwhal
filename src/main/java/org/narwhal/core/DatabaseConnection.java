@@ -79,6 +79,7 @@ public class DatabaseConnection {
         private List<String> columns;
         private Method primaryKeyGetMethod;
         private Map<Character, String> queries;
+        private String primaryColumnName;
 
 
         /**
@@ -96,6 +97,7 @@ public class DatabaseConnection {
             getMethods = getGetMethods(mappedClass, annotatedFields);
             primaryKeyGetMethod = getPrimaryKeyMethod(mappedClass, annotatedFields);
             columns = getColumnsName(annotatedFields);
+            primaryColumnName = getPrimaryKeyColumnName(mappedClass, annotatedFields);
             queries = getQueries(mappedClass);
         }
 
@@ -148,6 +150,17 @@ public class DatabaseConnection {
             }
 
             return columns;
+        }
+
+        private <T> String getPrimaryKeyColumnName(Class<T> mappedClass, List<Field> annotatedFields) {
+            for (Field field : annotatedFields) {
+                if (field.getAnnotation(Column.class).primaryKey()) {
+                    return field.getAnnotation(Column.class).value();
+                }
+            }
+
+            throw new IllegalArgumentException("Class " + mappedClass +
+                    " doesn't have a field that was annotated by " + Column.class + " annotation with primaryKey = true");
         }
 
         private <T> String getTableName(Class<T> mappedClass) {
@@ -257,7 +270,7 @@ public class DatabaseConnection {
             return queries;
         }
 
-        private String makeSelectQuery() {
+        private String makeSelectQuery(String tableName) {
             StringBuilder builder = new StringBuilder("SELECT (");
 
             for (int i = 0; i < columns.size(); ++i) {
@@ -267,7 +280,11 @@ public class DatabaseConnection {
 
                 builder.append(columns.get(i));
             }
-            builder.append(") FROM ? WHERE ? = ?");
+            builder.append(") FROM ");
+            builder.append(tableName);
+            builder.append(" WHERE ");
+            builder.append(primaryColumnName);
+            builder.append(" = ?");
 
             return builder.toString();
         }
