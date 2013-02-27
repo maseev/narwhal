@@ -262,6 +262,11 @@ public class DatabaseConnection {
             String tableName = getTableName(mappedClass);
             Map<Character, String> queries = new HashMap<Character, String>();
 
+            queries.put('C', makeInsertQuery(tableName));
+            queries.put('R', makeSelectQuery(tableName));
+            queries.put('U', makeUpdateQuery(tableName));
+            queries.put('D', makeDeleteQuery(tableName));
+
             return queries;
         }
 
