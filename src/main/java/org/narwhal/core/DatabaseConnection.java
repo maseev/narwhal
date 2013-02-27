@@ -74,7 +74,7 @@ public class DatabaseConnection {
     private static class MappedClassInformation<T> {
 
         private Constructor<T> constructor;
-        private List<Method> methods;
+        private List<Method> setMethods;
         private List<String> columns;
         private Map<Character, String> queries;
 
@@ -89,11 +89,10 @@ public class DatabaseConnection {
          * */
         public MappedClassInformation(Class<T> mappedClass) throws NoSuchMethodException {
             List<Field> annotatedFields = getAnnotatedFields(mappedClass, Column.class);
-            String tableName = getTableName(mappedClass);
             constructor = mappedClass.getConstructor();
-            methods = getSetMethods(mappedClass, annotatedFields);
+            setMethods = getSetMethods(mappedClass, annotatedFields);
             columns = getColumnsName(annotatedFields);
-            queries = getQueries();
+            queries = getQueries(mappedClass);
         }
 
         /**
@@ -101,8 +100,8 @@ public class DatabaseConnection {
          *
          * @return List of set methods.
          * */
-        public List<Method> getMethods() {
-            return methods;
+        public List<Method> getSetMethods() {
+            return setMethods;
         }
 
         /**
@@ -168,6 +167,13 @@ public class DatabaseConnection {
             return annotatedFields;
         }
 
+        private String getMethodName(String fieldName, String prefix) {
+            char[] fieldNameArray = fieldName.toCharArray();
+            fieldNameArray[0] = Character.toUpperCase(fieldNameArray[0]);
+
+            return prefix + new String(fieldNameArray);
+        }
+
         /**
          * Creates and returns name of the set method from string representation of the field.
          *
@@ -175,10 +181,11 @@ public class DatabaseConnection {
          * @return String representation of the set method.
          * */
         private String getSetMethodName(String fieldName) {
-            char[] fieldNameArray = fieldName.toCharArray();
-            fieldNameArray[0] = Character.toUpperCase(fieldNameArray[0]);
+            return getMethodName(fieldName, "set");
+        }
 
-            return "set" + new String(fieldNameArray);
+        private String getGetMethodName(String fieldName) {
+            return getMethodName(fieldName, "get");
         }
 
         /**
@@ -203,15 +210,31 @@ public class DatabaseConnection {
             return methods;
         }
 
-        private Map<Character, String> getQueries() {
+        private <T> Map<Character, String> getQueries(Class<T> mappedClass) {
+            String tableName = getTableName(mappedClass);
             Map<Character, String> queries = new HashMap<Character, String>();
 
-            String insertQuery = "INSERT INTO <TABLE NAME> (columns) VALUES (columns)";
-            String selectQuery = "SELECT (columns) FROM <TABLE NAME> WHERE primary_key = ?";
-            String deleteQuery = "DELETE FROM <TABLE NAME> WHERE primary_key = ?";
-            String updateQuery = "UPDATE <TABLE NAME> SET column = ?, ... WHERE primary_key = ?";
+            String selectQuery = "SELECT (columns) FROM ? WHERE primary_key = ?";
+            String insertQuery = "INSERT INTO ? (columns) VALUES (columns)";
+            String deleteQuery = "DELETE FROM ? WHERE primary_key = ?";
+            String updateQuery = "UPDATE ? SET column = ?, ... WHERE primary_key = ?";
 
             return queries;
+        }
+
+        private String makeSelectQuery() {
+            StringBuilder builder = new StringBuilder("SELECT (");
+
+            for (int i = 0; i < columns.size(); ++i) {
+                if (i > 0 && i < columns.size() - 1) {
+                    builder.append(',');
+                }
+
+                builder.append(columns.get(i));
+            }
+            builder.append(") FROM ? WHERE ? = ?");
+
+            return builder.toString();
         }
     }
 
@@ -650,13 +673,13 @@ public class DatabaseConnection {
      * @throws SQLException If any database access problems happened.
      * */
      private <T> T createEntitySupporter(ResultSet resultSet, MappedClassInformation<T> classInformation) throws IllegalAccessException, InvocationTargetException, InstantiationException, SQLException {
-        List<Method> methods = classInformation.getMethods();
+        List<Method> setMethods = classInformation.getSetMethods();
         List<String> columns = classInformation.getColumns();
         T result = classInformation.getConstructor().newInstance();
 
         for (int i = 0; i < columns.size(); ++i) {
             Object data = resultSet.getObject(columns.get(i));
-            methods.get(i).invoke(result, data);
+            setMethods.get(i).invoke(result, data);
         }
 
         return result;
