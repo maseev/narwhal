@@ -480,6 +480,15 @@ public class DatabaseConnection {
     }
 
     /**
+     * Returns raw connection object.
+     *
+     * @return Connection object corresponding to the DatabaseConnection object.
+     * */
+    public Connection getRawConnection() {
+        return connection;
+    }
+
+    /**
      * Builds prepared statement. This method takes the string representation of SQL query and the arbitrary
      * number of wildcard parameters.
      * This method substitutes every wildcard symbol in the SQL query on the corresponding wildcard
