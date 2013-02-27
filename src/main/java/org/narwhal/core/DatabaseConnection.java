@@ -280,6 +280,18 @@ public class DatabaseConnection {
         connection = getConnection(databaseInformation);
     }
 
+    public int persist(Object object) {
+
+    }
+
+    public int remove(Object object) {
+
+    }
+
+    public <T> T find(Class<T> mappedClass, Object column) {
+        
+    }
+
     /**
      * Builds and executes update SQL query. This method returns the number of rows that have been affected.
      *
