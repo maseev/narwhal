@@ -262,29 +262,59 @@ public class DatabaseConnection {
             String tableName = getTableName(mappedClass);
             Map<Character, String> queries = new HashMap<Character, String>();
 
-            String selectQuery = "SELECT (columns) FROM ? WHERE primary_key = ?";
-            String insertQuery = "INSERT INTO ? (columns) VALUES (columns)";
-            String deleteQuery = "DELETE FROM ? WHERE primary_key = ?";
-            String updateQuery = "UPDATE ? SET column = ?, ... WHERE primary_key = ?";
-
             return queries;
         }
 
         private String makeSelectQuery(String tableName) {
-            StringBuilder builder = new StringBuilder("SELECT (");
+            StringBuilder builder = new StringBuilder("SELECT * FROM ");
+            builder.append(tableName);
+            builder.append(" WHERE ");
+            builder.append(primaryColumnName);
+            builder.append(" = ?");
+
+            return builder.toString();
+        }
+
+        private String makeInsertQuery(String tableName) {
+            StringBuilder builder = new StringBuilder("INSERT INTO ");
+            builder.append(tableName);
+            builder.append(" VALUES (");
 
             for (int i = 0; i < columns.size(); ++i) {
                 if (i > 0 && i < columns.size() - 1) {
                     builder.append(',');
                 }
 
-                builder.append(columns.get(i));
+                builder.append('?');
             }
-            builder.append(") FROM ");
+            builder.append(")");
+
+            return builder.toString();
+        }
+
+        private String makeDeleteQuery(String tableName) {
+            StringBuilder builder = new StringBuilder("DELETE FROM ");
             builder.append(tableName);
             builder.append(" WHERE ");
             builder.append(primaryColumnName);
             builder.append(" = ?");
+
+            return builder.toString();
+        }
+
+        private String makeUpdateQuery(String tableName) {
+            StringBuilder builder = new StringBuilder("UPDATE ");
+            builder.append(primaryColumnName);
+
+            for (int i = 0; i < columns.size(); ++i) {
+                if (i > 0 && i < columns.size() - 1) {
+                    builder.append(',');
+                }
+
+                builder.append("SET ");
+                builder.append(columns.get(i));
+                builder.append(" = ?");
+            }
 
             return builder.toString();
         }
