@@ -1,6 +1,7 @@
 package org.narwhal.core;
 
 import org.narwhal.annotation.Column;
+import org.narwhal.annotation.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +76,7 @@ public class DatabaseConnection {
         private Constructor<T> constructor;
         private List<Method> methods;
         private List<String> columns;
+        private Map<Character, String> queries;
 
 
         /**
@@ -87,9 +89,11 @@ public class DatabaseConnection {
          * */
         public MappedClassInformation(Class<T> mappedClass) throws NoSuchMethodException {
             List<Field> annotatedFields = getAnnotatedFields(mappedClass, Column.class);
+            String tableName = getTableName(mappedClass);
             constructor = mappedClass.getConstructor();
             methods = getSetMethods(mappedClass, annotatedFields);
             columns = getColumnsName(annotatedFields);
+            queries = getQueries();
         }
 
         /**
@@ -133,6 +137,15 @@ public class DatabaseConnection {
             }
 
             return columns;
+        }
+
+        private <T> String getTableName(Class<T> mappedClass) {
+            if (mappedClass.isAnnotationPresent(Table.class)) {
+                return mappedClass.getAnnotation(Table.class).value();
+            }
+
+            throw new IllegalArgumentException("Class " + mappedClass.toString() +
+                    " wasn't annotated by " + Table.class + " annotation");
         }
 
         /**
@@ -188,6 +201,17 @@ public class DatabaseConnection {
             }
 
             return methods;
+        }
+
+        private Map<Character, String> getQueries() {
+            Map<Character, String> queries = new HashMap<Character, String>();
+
+            String insertQuery = "INSERT INTO <TABLE NAME> (columns) VALUES (columns)";
+            String selectQuery = "SELECT (columns) FROM <TABLE NAME> WHERE primary_key = ?";
+            String deleteQuery = "DELETE FROM <TABLE NAME> WHERE primary_key = ?";
+            String updateQuery = "UPDATE <TABLE NAME> SET column = ?, ... WHERE primary_key = ?";
+
+            return queries;
         }
     }
 
@@ -281,7 +305,7 @@ public class DatabaseConnection {
     }
 
     public int persist(Object object) {
-
+        "INSERT INTO <Table name> (columns name) VALUES ()"
     }
 
     public int remove(Object object) {
@@ -289,7 +313,7 @@ public class DatabaseConnection {
     }
 
     public <T> T find(Class<T> mappedClass, Object column) {
-        
+
     }
 
     /**
