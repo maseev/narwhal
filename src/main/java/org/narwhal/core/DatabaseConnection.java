@@ -118,6 +118,10 @@ public class DatabaseConnection {
             return primaryKeyGetMethod;
         }
 
+        public String getQuery(char flag) {
+            return queries.get(flag);
+        }
+
         /**
          * Returns list of the columns that have been retrieved from the annotated fields.
          *
@@ -414,8 +418,12 @@ public class DatabaseConnection {
         connection = getConnection(databaseInformation);
     }
 
-    public int persist(Object object) {
+    public int persist(Object object) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, SQLException {
+        Object[] parameters = getParameters(object);
+        MappedClassInformation classInformation = cache.get(object.getClass());
+        String query = classInformation.getQuery('C');
 
+        return executeUpdate(query, parameters);
     }
 
     public int remove(Object object) {
@@ -637,8 +645,8 @@ public class DatabaseConnection {
     @SuppressWarnings("unchecked")
     private Object[] getParameters(Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         List<Object> parameters = new ArrayList<Object>();
+        MappedClassInformation classInformation;
 
-        MappedClassInformation classInformation = null;
         if (cache.containsKey(object.getClass())) {
             classInformation = cache.get(object.getClass());
         } else {
