@@ -77,6 +77,7 @@ public class DatabaseConnection {
         private List<Method> setMethods;
         private List<Method> getMethods;
         private List<String> columns;
+        private Method primaryKeyGetMethod;
         private Map<Character, String> queries;
 
 
@@ -93,6 +94,7 @@ public class DatabaseConnection {
             constructor = mappedClass.getConstructor();
             setMethods = getSetMethods(mappedClass, annotatedFields);
             getMethods = getGetMethods(mappedClass, annotatedFields);
+            primaryKeyGetMethod = getPrimaryKeyMethod(mappedClass, annotatedFields);
             columns = getColumnsName(annotatedFields);
             queries = getQueries(mappedClass);
         }
@@ -108,6 +110,10 @@ public class DatabaseConnection {
 
         public List<Method> getGetMethods() {
             return getMethods;
+        }
+
+        public Method getPrimaryKeyGetMethod() {
+            return primaryKeyGetMethod;
         }
 
         /**
@@ -208,9 +214,7 @@ public class DatabaseConnection {
 
             for (Field field : fields) {
                 String methodName = getSetMethodName(field.getName());
-                Method method = mappedClass.getMethod(methodName, field.getType());
-
-                methods.add(method);
+                methods.add(mappedClass.getMethod(methodName, field.getType()));
             }
 
             return methods;
@@ -222,13 +226,23 @@ public class DatabaseConnection {
             for (Field field : fields) {
                 if (!field.getAnnotation(Column.class).primaryKey()) {
                     String methodName = getGetMethodName(field.getName());
-                    Method method = mappedClass.getMethod(methodName, field.getType());
-
-                    methods.add(method);
+                    methods.add(mappedClass.getMethod(methodName, field.getType()));
                 }
             }
 
             return methods;
+        }
+
+        private <T> Method getPrimaryKeyMethod(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException{
+            for (Field field : fields) {
+                if (field.getAnnotation(Column.class).primaryKey()) {
+                    String methodName = getGetMethodName(field.getName());
+                    return mappedClass.getMethod(methodName, field.getType());
+                }
+            }
+
+            throw new IllegalArgumentException("Class " + mappedClass +
+                    " doesn't have a field that was annotated by " + Column.class + " annotation with primaryKey = true");
         }
 
         private <T> Map<Character, String> getQueries(Class<T> mappedClass) {
