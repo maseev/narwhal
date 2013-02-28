@@ -649,15 +649,7 @@ public class DatabaseConnection {
     @SuppressWarnings("unchecked")
     private Object[] getParameters(Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         List<Object> parameters = new ArrayList<Object>();
-        MappedClassInformation classInformation;
-
-        if (cache.containsKey(object.getClass())) {
-            classInformation = cache.get(object.getClass());
-        } else {
-            classInformation = new MappedClassInformation(object.getClass());
-            cache.put(object.getClass(), classInformation);
-        }
-
+        MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         List<Method> getMethods = classInformation.getGetMethods();
 
         for (Method method : getMethods) {
