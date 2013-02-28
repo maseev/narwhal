@@ -29,8 +29,27 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void transactionMethodsTest() {
+    public void transactionMethodsTest() throws SQLException {
+        int expectedRowAffected = 3;
+        int result = 0;
 
+        try {
+            connection.beginTransaction();
+
+            result += connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", null, "Test");
+            result += connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "TestTest", "Test");
+            result += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
+
+            connection.commit();
+        } finally {
+            connection.rollback();
+        }
+
+        try {
+            Assert.assertEquals(expectedRowAffected, result);
+        } finally {
+            restoreDatabase();
+        }
     }
 
     @Test
@@ -39,14 +58,16 @@ public class DatabaseConnectionTest {
         int expectedRowAffected = 1;
         int result = connection.create(person);
 
-        Assert.assertEquals(expectedRowAffected, result);
-
-        connection.executeUpdate("DELETE FROM Person WHERE name = ?", person.getName());
+        try {
+            Assert.assertEquals(expectedRowAffected, result);
+        } finally {
+            restoreDatabase();
+        }
     }
 
     @Test
     public void readTest() {
-
+        
     }
 
     @Test
@@ -65,9 +86,11 @@ public class DatabaseConnectionTest {
         int expectedRowAffected = 1;
         int result = connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "FunnyName", queryName);
 
-        Assert.assertEquals(expectedRowAffected, result);
-
-        restoreDatabase();
+        try {
+            Assert.assertEquals(expectedRowAffected, result);
+        } finally {
+            restoreDatabase();
+        }
     }
 
     @Test
@@ -86,6 +109,7 @@ public class DatabaseConnectionTest {
         List<Person> persons = connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
         int expectedSize = 2;
 
+        Assert.assertNotNull(persons);
         Assert.assertEquals(expectedSize, persons.size());
         Assert.assertEquals("John", persons.get(0).getName());
         Assert.assertEquals("Doe", persons.get(1).getName());
