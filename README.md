@@ -9,9 +9,10 @@ The major aim is to create useful library that helps to retrieve particular info
 
 Features
 --------
-
+* Provides convinient methods for manupulating entity (persist, read, update, delete).
+* Basic transaction management supports.
 * Supports connection pool;
-* Provides easy way to map fields of a class to the columns of the database through annotation;
+* Provides easy way to map class fields to the database columns through annotation;
 * Automatically creating instance of the mapped class;
 * Includes succint number of convenient methods that provide the easy way to use prepared statements to query database;
 * Automated work with resources (e.g. closing prepared statements, result set, closing database connection when some error occurs);
@@ -23,6 +24,7 @@ Here's an example of using annotation to mark fields of the mapped class.
 Notice! All the mapped classes have to use annotation to map fields to the corresponding columns of the database table:
 
 ```java
+@Table("person")
 public class Person {
 	@Column("person_id")
 	private int id;
@@ -96,8 +98,26 @@ Here are the examples of using insert, update and delete queries:
 connection.executeUpdate("INSERT INTO person (id, name) VALUES (?, ?)", null, "John");
 connection.executeUpdate("UPDATE person SET id = 1 WHERE name = ?", "John");
 connection.executeUpdate("DELETE FROM person WHERE id > ?", 0);
-```	
+```
+
+The following example illustrates using convenient methods to persist entity to the database as well as basic transaction management:
+
+```java
+try {
+	connection.beginTransaction();
 	
+	connection.create(new Person(1, "John");
+	connection.update(person1);
+	connection.delete(person2);
+	
+	connection.commit();
+	
+	Person person = connection.read(Person.class, 1);
+} finally {
+	connection.rollback();
+}
+```
+
 Library dependencies
 --------------------
 
