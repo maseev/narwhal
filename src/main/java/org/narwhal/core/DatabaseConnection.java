@@ -433,8 +433,12 @@ public class DatabaseConnection {
         return executeQuery(query, mappedClass, primaryKey);
     }
 
-    public int udpate(Object object) {
+    public int udpate(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
+        Object[] parameters = getParameters(object);
+        MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
+        String query = classInformation.getQuery('U');
 
+        return executeUpdate(query, parameters);
     }
 
     public int delete(Object object) {
