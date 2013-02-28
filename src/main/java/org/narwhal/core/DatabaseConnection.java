@@ -63,6 +63,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class DatabaseConnection {
 
+    /**
+     * The <code>QueryType</code> enum describes types
+     * of query that use in createQueries method.
+     * */
     private static enum QueryType {
         CREATE,
         READ,
@@ -114,14 +118,29 @@ public class DatabaseConnection {
             return setMethods;
         }
 
+        /**
+         * Returns list of the get methods for corresponding fields of the class.
+         *
+         * @return List of get methods.
+         * */
         public List<Method> getGetMethods() {
             return getMethods;
         }
 
+        /**
+         * Returns getter method for class field that annotated by Column annotation with primaryKey = true.
+         *
+         * @return Getter method for field of the class that maps to the primary key.
+         * */
         public Method getPrimaryKeyGetMethod() {
             return primaryKeyGetMethod;
         }
 
+        /**
+         * Returns string representation of the SQL query by the QueryType object.
+         *
+         * @return String representation of the SQL query.
+         * */
         public String getQuery(QueryType queryType) {
             return queries.get(queryType);
         }
@@ -160,6 +179,14 @@ public class DatabaseConnection {
             return columns;
         }
 
+        /**
+         * Retrieves primary key name of the database table from the annotated fields.
+         *
+         * @param mappedClass A class, which is used for creating appropriate exception message.
+         * @param annotatedFields Fields of class that have been annotated by {@literal @}Column annotation.
+         * @throws IllegalArgumentException if field of the class wasn't annotated by the {@literal @}Column annotation
+         *         with primaryKey = true.
+         * */
         private <T> String getPrimaryKeyColumnName(Class<T> mappedClass, List<Field> annotatedFields) {
             for (Field field : annotatedFields) {
                 if (field.getAnnotation(Column.class).primaryKey()) {
@@ -171,6 +198,14 @@ public class DatabaseConnection {
                     " doesn't have a field that was annotated by " + Column.class + " annotation with primaryKey = true");
         }
 
+        /**
+         * Retrieves string representation of the table name that maps to the particular entity.
+         *
+         * @param mappedClass A class that is used for checking whether
+         *                    class was annotated by a particular annotation or not.
+         * @return string representation of the table name.
+         * @throws IllegalArgumentException If class wasn't annotated by the Table annotation.
+         * */
         private <T> String getTableName(Class<T> mappedClass) {
             if (mappedClass.isAnnotationPresent(Table.class)) {
                 return mappedClass.getAnnotation(Table.class).value();
@@ -185,7 +220,7 @@ public class DatabaseConnection {
          *
          * @param mappedClass A Class, which is used for retrieving information about constructors, set methods etc.
          * @param annotation Annotation which is used as a condition to filter annotated fields of the class.
-         * @return Fields that have been annotated by a particular annotation.
+         * @return List of fields that have been annotated by a particular annotation.
          * */
         private <T, V extends Annotation> List<Field> getAnnotatedFields(Class<T> mappedClass, Class<V> annotation) {
             Field[] fields = mappedClass.getDeclaredFields();
@@ -200,6 +235,13 @@ public class DatabaseConnection {
             return annotatedFields;
         }
 
+        /**
+         * Constructs string representation method by using field name and a prefix (get, set).
+         *
+         * @param fieldName String representation of the class field.
+         * @param prefix Prefix that uses to create whether getter or setter.
+         * @return String representation of the class method.
+         * */
         private String getMethodName(String fieldName, String prefix) {
             char[] fieldNameArray = fieldName.toCharArray();
             fieldNameArray[0] = Character.toUpperCase(fieldNameArray[0]);
@@ -217,6 +259,12 @@ public class DatabaseConnection {
             return getMethodName(fieldName, "set");
         }
 
+        /**
+         * Creates and returns name of the get method from string representation of the field.
+         *
+         * @param fieldName String representation of class field.
+         * @return String representation of the set method.
+         * */
         private String getGetMethodName(String fieldName) {
             return getMethodName(fieldName, "get");
         }
@@ -226,7 +274,7 @@ public class DatabaseConnection {
          * which is used for retrieving set methods from the class.
          *
          * @param mappedClass A Class, which is used for retrieving information about constructors, set methods etc.
-         * @param fields Fields of the class that.
+         * @param fields Fields of the class.
          * @return Set methods of the class.
          * @throws NoSuchMethodException If there is no appropriate method to invoke.
          * */
@@ -241,6 +289,15 @@ public class DatabaseConnection {
             return methods;
         }
 
+        /**
+         * Returns all get methods from the class. This method uses list of fields
+         * which is used for retrieving set methods from the class.
+         *
+         * @param mappedClass A Class, which is used for retrieving information about constructors, set methods etc.
+         * @param fields Fields of the class.
+         * @return Set methods of the class.
+         * @throws NoSuchMethodException If there is no appropriate method to invoke.
+         * */
         private <T> List<Method> getGetMethods(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
             List<Method> methods = new ArrayList<Method>();
 
@@ -254,7 +311,16 @@ public class DatabaseConnection {
             return methods;
         }
 
-        private <T> Method getPrimaryKeyMethod(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException{
+        /**
+         * Retrieves getter method for the class' field that was annotated by the
+         * {@literal @}Column annotation with primaryKey = true.
+         *
+         * @param mappedClass A Class, which is used for retrieving information about constructors, set methods etc.
+         * @param fields Fields of the class.
+         * @return Getter method for the field that maps to the primary key.
+         * @throws NoSuchMethodException If there is no appropriate method to invoke.
+         * */
+        private <T> Method getPrimaryKeyMethod(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
             for (Field field : fields) {
                 if (field.getAnnotation(Column.class).primaryKey()) {
                     String methodName = getGetMethodName(field.getName());
@@ -266,6 +332,12 @@ public class DatabaseConnection {
                     " doesn't have a field that was annotated by " + Column.class + " annotation with primaryKey = true");
         }
 
+        /**
+         * Return maps of the QueryType and string representation of the SQL query pairs.
+         *
+         * @param mappedClass A Class, which is used for retrieving information about constructors, set methods etc.
+         * @return Map of QueryType and SQL query pairs.
+         * */
         private <T> Map<QueryType, String> createQueries(Class<T> mappedClass) {
             String tableName = getTableName(mappedClass);
             Map<QueryType, String> queries = new HashMap<QueryType, String>();
@@ -278,6 +350,12 @@ public class DatabaseConnection {
             return queries;
         }
 
+        /**
+         * Makes prepared INSERT SQL statement by using the table name.
+         *
+         * @param tableName String representation of the table name that maps to the particular entity.
+         * @return String representation of the INSERT SQL statement.
+         * */
         private String makeInsertQuery(String tableName) {
             StringBuilder builder = new StringBuilder("INSERT INTO ");
             builder.append(tableName);
@@ -295,6 +373,12 @@ public class DatabaseConnection {
             return builder.toString();
         }
 
+        /**
+         * Makes prepared SELECT SQL statement by using the table name.
+         *
+         * @param tableName String representation of the table name that maps to the particular entity.
+         * @return String representation of the SELECT SQL statement.
+         * */
         private String makeSelectQuery(String tableName) {
             StringBuilder builder = new StringBuilder("SELECT * FROM ");
             builder.append(tableName);
@@ -305,6 +389,12 @@ public class DatabaseConnection {
             return builder.toString();
         }
 
+        /**
+         * Makes prepared DELETE SQL statement by using the table name.
+         *
+         * @param tableName String representation of the table name that maps to the particular entity.
+         * @return String representation of the DELETE SQL statement.
+         * */
         private String makeDeleteQuery(String tableName) {
             StringBuilder builder = new StringBuilder("DELETE FROM ");
             builder.append(tableName);
@@ -315,6 +405,12 @@ public class DatabaseConnection {
             return builder.toString();
         }
 
+        /**
+         * Makes prepared UPDATE SQL statement by using the table name.
+         *
+         * @param tableName String representation of the table name that maps to the particular entity.
+         * @return String representation of the UPDATE SQL statement.
+         * */
         private String makeUpdateQuery(String tableName) {
             StringBuilder builder = new StringBuilder("UPDATE ");
             builder.append(tableName);
@@ -424,19 +520,48 @@ public class DatabaseConnection {
         connection = getConnection(databaseInformation);
     }
 
+    /**
+     * Begins new transaction to perform.
+     *
+     * @throws SQLException If any database access problems happened.
+     * */
     public void beginTransaction() throws SQLException {
         connection.setAutoCommit(false);
     }
 
+    /**
+     * Makes all changes made since the previous commit/rollback permanent
+     * and releases any database locks currently held by this Connection object.
+     * This method should be used only when auto-commit mode has been disabled.
+     *
+     * @throws SQLException If any database access problems happened.
+     * */
     public void commit() throws SQLException {
         connection.commit();
         connection.setAutoCommit(true);
     }
 
+    /**
+     * Undoes all changes made in the current transaction and releases any database
+     * locks currently held by this Connection object.
+     * This method should be used only when auto-commit mode has been disabled.
+     *
+     * @throws SQLException If any database access problems happened.
+     * */
     public void rollback() throws SQLException {
         connection.rollback();
     }
 
+    /**
+     * Persists entity in the database.
+     *
+     * @param object Entity object that should be persisted in the database.
+     * @return Number of rows that have been affected after performing sql query.
+     * @throws IllegalAccessException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws SQLException If any database access problems happened.
+     * */
     public int create(Object object) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, SQLException {
         List<Object> parameters = new ArrayList<Object>();
         parameters.add(getPrimaryKeyMethodValue(object));
@@ -448,6 +573,8 @@ public class DatabaseConnection {
         return executeUpdate(query, parameters.toArray());
     }
 
+    /**
+     * */
     public <T> T read(Class<T> mappedClass, Object primaryKey) throws NoSuchMethodException, SQLException, InstantiationException, IllegalAccessException, InvocationTargetException {
         MappedClassInformation classInformation = getMappedClassInformation(mappedClass);
         String query = classInformation.getQuery(QueryType.READ);
@@ -455,6 +582,13 @@ public class DatabaseConnection {
         return executeQuery(query, mappedClass, primaryKey);
     }
 
+    /**
+     * @return Number of rows that have been affected after performing sql query.
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws SQLException
+     * */
     public int udpate(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
         List<Object> parameters = new ArrayList<Object>();
         parameters.add(Arrays.asList(getParameters(object)));
@@ -465,6 +599,16 @@ public class DatabaseConnection {
         return executeUpdate(query, parameters.toArray());
     }
 
+    /**
+     * Deletes a particular entity from the database.
+     *
+     * @param object entity that will be deleted from the database.
+     * @return Number of rows that have been affected after performing sql query.
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws SQLException
+     * */
     public int delete(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.DELETE);
