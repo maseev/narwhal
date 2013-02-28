@@ -11,10 +11,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -125,8 +122,8 @@ public class DatabaseConnection {
             return primaryKeyGetMethod;
         }
 
-        public String getQuery(char flag) {
-            return queries.get(flag);
+        public String getQuery(QueryType queryType) {
+            return queries.get(queryType);
         }
 
         /**
@@ -429,33 +426,39 @@ public class DatabaseConnection {
     }
 
     public int create(Object object) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, SQLException {
-        Object[] parameters = getParameters(object);
-        MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
-        String query = classInformation.getQuery('C');
+        List<Object> parameters = new ArrayList<Object>();
+        parameters.add(getPrimaryKeyMethodValue(object));
+        parameters.add(Arrays.asList(getParameters(object)));
 
-        return executeUpdate(query, parameters);
+        MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
+        String query = classInformation.getQuery(QueryType.CREATE);
+
+        return executeUpdate(query, parameters.toArray());
     }
 
     public <T> T read(Class<T> mappedClass, Object primaryKey) throws NoSuchMethodException, SQLException, InstantiationException, IllegalAccessException, InvocationTargetException {
         MappedClassInformation classInformation = getMappedClassInformation(mappedClass);
-        String query = classInformation.getQuery('R');
+        String query = classInformation.getQuery(QueryType.READ);
 
         return executeQuery(query, mappedClass, primaryKey);
     }
 
     public int udpate(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
-        Object[] parameters = getParameters(object);
+        List<Object> parameters = new ArrayList<Object>();
+        parameters.add(Arrays.asList(getParameters(object)));
+        parameters.add(getPrimaryKeyMethodValue(object));
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
-        String query = classInformation.getQuery('U');
+        String query = classInformation.getQuery(QueryType.UPDATE);
 
-        return executeUpdate(query, parameters);
+        return executeUpdate(query, parameters.toArray());
     }
 
-    public int delete(Object object) throws NoSuchMethodException {
+    public int delete(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
-        String query = classInformation.getQuery('D');
+        String query = classInformation.getQuery(QueryType.DELETE);
+        Object primaryKey = getPrimaryKeyMethodValue(object);
 
-        return 0;
+        return executeUpdate(query, primaryKey);
     }
 
     /**
@@ -745,6 +748,12 @@ public class DatabaseConnection {
         cache.put(mappedClass, classInformation);
 
         return classInformation;
+    }
+
+    private Object getPrimaryKeyMethodValue(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
+
+        return classInformation.getPrimaryKeyGetMethod().invoke(object);
     }
 
     /**
