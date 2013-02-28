@@ -418,7 +418,7 @@ public class DatabaseConnection {
         connection = getConnection(databaseInformation);
     }
 
-    public int persist(Object object) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, SQLException {
+    public int create(Object object) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, SQLException {
         Object[] parameters = getParameters(object);
         MappedClassInformation classInformation = cache.get(object.getClass());
         String query = classInformation.getQuery('C');
@@ -426,11 +426,15 @@ public class DatabaseConnection {
         return executeUpdate(query, parameters);
     }
 
-    public int remove(Object object) {
+    public <T> T read(Class<T> mappedClass, Object column) {
 
     }
 
-    public <T> T find(Class<T> mappedClass, Object column) {
+    public int udpate(Object object) {
+
+    }
+
+    public int delete(Object object) {
 
     }
 
@@ -651,6 +655,7 @@ public class DatabaseConnection {
             classInformation = cache.get(object.getClass());
         } else {
             classInformation = new MappedClassInformation(object.getClass());
+            cache.put(object.getClass(), classInformation);
         }
 
         List<Method> getMethods = classInformation.getGetMethods();
@@ -718,6 +723,18 @@ public class DatabaseConnection {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private MappedClassInformation getMappedClassInformation(Class mappedClass) throws NoSuchMethodException {
+        if (cache.containsKey(mappedClass)) {
+           return cache.get(mappedClass);
+        }
+
+        MappedClassInformation classInformation = new MappedClassInformation(mappedClass);
+        cache.put(mappedClass, classInformation);
+
+        return classInformation;
+    }
+
     /**
      * Registers JDBC driver and trying to connect to the database.
      *
@@ -756,20 +773,8 @@ public class DatabaseConnection {
      * */
      @SuppressWarnings("unchecked")
      private <T> T createEntity(ResultSet resultSet, Class<T> mappedClass) throws SQLException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        T result;
-
-        if (cache.containsKey(mappedClass)) {
-            MappedClassInformation<T> classInformation = cache.get(mappedClass);
-            result = createEntitySupporter(resultSet, classInformation);
-        } else {
-            MappedClassInformation<T> classInformation = new MappedClassInformation<T>(mappedClass);
-
-            cache.put(mappedClass, classInformation);
-            result = createEntitySupporter(resultSet, classInformation);
-        }
-
-        return result;
-    }
+        return (T) createEntitySupporter(resultSet, getMappedClassInformation(mappedClass));
+     }
 
     /**
      * Gets the information from the result set that has been pointed
