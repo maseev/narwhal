@@ -66,6 +66,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class DatabaseConnection {
 
+    private static enum QueryType {
+        CREATE,
+        READ,
+        UPDATE,
+        DELETE
+    }
+
     /**
      * The <code>MappedClassInformation</code> class keeps all the information about particular class.
      * Instance of this class holds data about set methods, constructors and columns name of the database
@@ -78,7 +85,7 @@ public class DatabaseConnection {
         private List<Method> getMethods;
         private List<String> columns;
         private Method primaryKeyGetMethod;
-        private Map<Character, String> queries;
+        private Map<QueryType, String> queries;
         private String primaryColumnName;
 
 
@@ -262,26 +269,16 @@ public class DatabaseConnection {
                     " doesn't have a field that was annotated by " + Column.class + " annotation with primaryKey = true");
         }
 
-        private <T> Map<Character, String> createQueries(Class<T> mappedClass) {
+        private <T> Map<QueryType, String> createQueries(Class<T> mappedClass) {
             String tableName = getTableName(mappedClass);
-            Map<Character, String> queries = new HashMap<Character, String>();
+            Map<QueryType, String> queries = new HashMap<QueryType, String>();
 
-            queries.put('C', makeInsertQuery(tableName));
-            queries.put('R', makeSelectQuery(tableName));
-            queries.put('U', makeUpdateQuery(tableName));
-            queries.put('D', makeDeleteQuery(tableName));
+            queries.put(QueryType.CREATE, makeInsertQuery(tableName));
+            queries.put(QueryType.READ,   makeSelectQuery(tableName));
+            queries.put(QueryType.UPDATE, makeUpdateQuery(tableName));
+            queries.put(QueryType.DELETE, makeDeleteQuery(tableName));
 
             return queries;
-        }
-
-        private String makeSelectQuery(String tableName) {
-            StringBuilder builder = new StringBuilder("SELECT * FROM ");
-            builder.append(tableName);
-            builder.append(" WHERE ");
-            builder.append(primaryColumnName);
-            builder.append(" = ?");
-
-            return builder.toString();
         }
 
         private String makeInsertQuery(String tableName) {
@@ -301,6 +298,16 @@ public class DatabaseConnection {
             return builder.toString();
         }
 
+        private String makeSelectQuery(String tableName) {
+            StringBuilder builder = new StringBuilder("SELECT * FROM ");
+            builder.append(tableName);
+            builder.append(" WHERE ");
+            builder.append(primaryColumnName);
+            builder.append(" = ?");
+
+            return builder.toString();
+        }
+
         private String makeDeleteQuery(String tableName) {
             StringBuilder builder = new StringBuilder("DELETE FROM ");
             builder.append(tableName);
@@ -313,7 +320,7 @@ public class DatabaseConnection {
 
         private String makeUpdateQuery(String tableName) {
             StringBuilder builder = new StringBuilder("UPDATE ");
-            builder.append(primaryColumnName);
+            builder.append(tableName);
 
             for (int i = 0; i < columns.size(); ++i) {
                 if (i > 0 && i < columns.size() - 1) {
@@ -322,8 +329,11 @@ public class DatabaseConnection {
 
                 builder.append("SET ");
                 builder.append(columns.get(i));
-                builder.append(" = ?");
+                builder.append(" = ? ");
             }
+            builder.append("WHERE ");
+            builder.append(primaryColumnName);
+            builder.append(" = ?");
 
             return builder.toString();
         }
@@ -441,8 +451,11 @@ public class DatabaseConnection {
         return executeUpdate(query, parameters);
     }
 
-    public int delete(Object object) {
+    public int delete(Object object) throws NoSuchMethodException {
+        MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
+        String query = classInformation.getQuery('D');
 
+        return 0;
     }
 
     /**
