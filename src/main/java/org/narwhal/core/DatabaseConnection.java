@@ -430,6 +430,7 @@ public class DatabaseConnection {
 
     public void commit() throws SQLException {
         connection.commit();
+        connection.setAutoCommit(true);
     }
 
     public void rollback() throws SQLException {
