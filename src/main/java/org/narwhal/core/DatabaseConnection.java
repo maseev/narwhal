@@ -307,7 +307,7 @@ public class DatabaseConnection {
             for (Field field : fields) {
                 if (!field.getAnnotation(Column.class).primaryKey()) {
                     String methodName = getGetMethodName(field.getName());
-                    methods.add(mappedClass.getMethod(methodName, field.getType()));
+                    methods.add(mappedClass.getMethod(methodName));
                 }
             }
 

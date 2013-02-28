@@ -41,7 +41,8 @@ public class DatabaseConnectionTest {
             result += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
 
             connection.commit();
-        } finally {
+        } catch (SQLException ex){
+            ex.printStackTrace();
             connection.rollback();
         }
 
@@ -86,6 +87,7 @@ public class DatabaseConnectionTest {
 
         try {
             connection.update(person);
+            Assert.assertEquals(expectedRowAffected, result);
         } finally {
             restoreDatabase();
         }
