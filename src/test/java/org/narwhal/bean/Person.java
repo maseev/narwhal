@@ -10,7 +10,7 @@ import org.narwhal.annotation.Table;
 public class Person {
 
     @Column(value = "ID", primaryKey = true)
-    private int id;
+    private Integer id;
     @Column("NAME")
     private String name;
 
@@ -18,16 +18,16 @@ public class Person {
     public Person() {
     }
 
-    public Person(int id, String name) {
+    public Person(Integer id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
