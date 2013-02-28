@@ -364,7 +364,7 @@ public class DatabaseConnection {
          * @param key Key whose presence in this map is to be tested
          * @return True if cache contains the key. False otherwise.
          * */
-        public boolean containsKey(Object key) {
+        public boolean containsKey(Class key) {
             readLock.lock();
             try {
                 return entityCache.containsKey(key);
@@ -396,7 +396,7 @@ public class DatabaseConnection {
          * @param key Key whose presence in this map is to be tested
          * @return Instance of the MappedClassInformation if the key is presence in the map. Null otherwise.
          * */
-        public MappedClassInformation get(Object key) {
+        public MappedClassInformation get(Class key) {
             readLock.lock();
             try {
                 return entityCache.get(key);
@@ -411,7 +411,6 @@ public class DatabaseConnection {
     private Connection connection;
 
 
-
     /**
      * Initializes a new instance of the DatabaseConnection class and trying to connect to the database.
      * Instance is specified by the value of DatabaseInformation class that keeps all the information needed to connect.
@@ -423,6 +422,18 @@ public class DatabaseConnection {
      * */
     public DatabaseConnection(DatabaseInformation databaseInformation) throws ClassNotFoundException, SQLException {
         connection = getConnection(databaseInformation);
+    }
+
+    public void beginTransaction() throws SQLException {
+        connection.setAutoCommit(false);
+    }
+
+    public void commit() throws SQLException {
+        connection.commit();
+    }
+
+    public void rollback() throws SQLException {
+        connection.rollback();
     }
 
     public int create(Object object) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, SQLException {
