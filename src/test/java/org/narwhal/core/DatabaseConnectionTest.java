@@ -66,25 +66,50 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void readTest() {
-        
+    public void readTest() throws InvocationTargetException, NoSuchMethodException,
+            InstantiationException, SQLException, IllegalAccessException {
+        Person person = connection.read(Person.class, 1);
+
+        try {
+            Assert.assertEquals("John", person.getName());
+        } finally {
+            restoreDatabase();
+        }
     }
 
     @Test
-    public void updateTest() {
+    public void updateTest() throws SQLException, NoSuchMethodException,
+            IllegalAccessException, InvocationTargetException {
+        Person person = new Person(1, "John Doe");
+        int expectedRowAffected = 1;
+        int result = connection.update(person);
 
+        try {
+            connection.update(person);
+        } finally {
+            restoreDatabase();
+        }
     }
 
     @Test
-    public void deleteTest() {
+    public void deleteTest() throws SQLException, NoSuchMethodException,
+            IllegalAccessException, InvocationTargetException {
+        Person person = new Person(1, "John");
+        int expectedRowAffected = 1;
+        int result = connection.delete(person);
 
+        try {
+            Assert.assertEquals(expectedRowAffected, result);
+        } finally {
+            restoreDatabase();
+        }
     }
 
     @Test
     public void executeUpdateTest() throws SQLException {
-        String queryName = "Doe";
+        int doeId = 2;
         int expectedRowAffected = 1;
-        int result = connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "FunnyName", queryName);
+        int result = connection.executeUpdate("UPDATE Person SET name = ? WHERE id = ?", "FunnyName", doeId);
 
         try {
             Assert.assertEquals(expectedRowAffected, result);
@@ -97,7 +122,8 @@ public class DatabaseConnectionTest {
     public void executeQueryTest() throws SQLException, IllegalAccessException,
             InstantiationException, NoSuchMethodException, InvocationTargetException {
         String expectedName = "John";
-        Person person = connection.executeQuery("SELECT * FROM Person WHERE name = ?", Person.class, expectedName);
+        int joeId = 1;
+        Person person = connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, joeId);
 
         Assert.assertNotNull(person);
         Assert.assertEquals(expectedName, person.getName());
@@ -116,15 +142,12 @@ public class DatabaseConnectionTest {
     }
 
     private void restoreDatabase() throws SQLException {
-        String firstName = "John";
-        String secondName = "Doe";
-
         try {
             connection.beginTransaction();
 
             connection.executeUpdate("DELETE FROM Person");
-            connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", null, firstName);
-            connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", null, secondName);
+            connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", 1, "John");
+            connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", 2,  "Doe");
 
             connection.commit();
         } finally {
