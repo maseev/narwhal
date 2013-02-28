@@ -24,6 +24,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * DatabaseConnection class also manages all resources like database connection,
  * prepared statements, result sets etc.
  * It also provides basic logging using slf4j library for this case.
+ * This class also supports basic transaction management and convenient methods for create,
+ * update, delete, read entity from the database.
  * </p>
  *
  * <p>
@@ -33,13 +35,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *     Here's an example how to use the annotation:
  *
  *     <p><code>
+ *         {@literal @}Table("person")
  *         public class Person {
  *             {@literal @}Column("person_id")
  *             private int id;
  *             {@literal @}Column("name)
  *             private String name;
  *
- *             // get and set methods.
+ *             // getter and setter methods.
  *         }
  *     </code></p>
  *
@@ -557,10 +560,10 @@ public class DatabaseConnection {
      *
      * @param object Entity object that should be persisted in the database.
      * @return Number of rows that have been affected after performing sql query.
-     * @throws IllegalAccessException
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
      * @throws SQLException If any database access problems happened.
+     * @throws InvocationTargetException If there is any problem with invocation.
+     * @throws NoSuchMethodException If there is no appropriate method to invoke
+     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
     public int create(Object object) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, SQLException {
         List<Object> parameters = new ArrayList<Object>();
@@ -574,6 +577,15 @@ public class DatabaseConnection {
     }
 
     /**
+     * Retrieves a particular entity from the database by using primary key.
+     *
+     * @param mappedClass A Class, whose annotated fields will be used for creating corresponding entity.
+     * @param primaryKey primary key that is used to find a particular row in the database.
+     * @throws SQLException If any database access problems happened.
+     * @throws InvocationTargetException If there is any problem with invocation.
+     * @throws NoSuchMethodException If there is no appropriate method to invoke
+     * @throws InstantiationException If there is any problem with creating object.
+     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
     public <T> T read(Class<T> mappedClass, Object primaryKey) throws NoSuchMethodException, SQLException, InstantiationException, IllegalAccessException, InvocationTargetException {
         MappedClassInformation classInformation = getMappedClassInformation(mappedClass);
@@ -583,13 +595,16 @@ public class DatabaseConnection {
     }
 
     /**
+     * Updates a particular entity in the database.
+     *
+     * @param object entity which data will be used to update row in the database.
      * @return Number of rows that have been affected after performing sql query.
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
-     * @throws SQLException
+     * @throws SQLException If any database access problems happened.
+     * @throws InvocationTargetException If there is any problem with invocation.
+     * @throws NoSuchMethodException If there is no appropriate method to invoke
+     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
-    public int udpate(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
+    public int update(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
         List<Object> parameters = new ArrayList<Object>();
         parameters.add(Arrays.asList(getParameters(object)));
         parameters.add(getPrimaryKeyMethodValue(object));
@@ -602,12 +617,12 @@ public class DatabaseConnection {
     /**
      * Deletes a particular entity from the database.
      *
-     * @param object entity that will be deleted from the database.
+     * @param  object entity that will be deleted from the database.
      * @return Number of rows that have been affected after performing sql query.
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
-     * @throws SQLException
+     * @throws SQLException If any database access problems happened.
+     * @throws InvocationTargetException If there is any problem with invocation.
+     * @throws NoSuchMethodException If there is no appropriate method to invoke
+     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
     public int delete(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
@@ -825,6 +840,15 @@ public class DatabaseConnection {
         return connection;
     }
 
+    /**
+     * Returns array of the parameters for the subsequent creating prepared statement.
+     *
+     * @param object Entity class whose data fields are used to create array of the parameters.
+     * @return Array of the parameters.
+     * @throws InvocationTargetException If there is any problem with invocation.
+     * @throws NoSuchMethodException If there is no appropriate method to invoke
+     * @throws IllegalAccessException If there is some problem with accessibility.
+     * */
     @SuppressWarnings("unchecked")
     private Object[] getParameters(Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         List<Object> parameters = new ArrayList<Object>();
@@ -894,6 +918,16 @@ public class DatabaseConnection {
         }
     }
 
+    /**
+     * Return instance of the MappedClassInformation class from the cache.
+     * If there's no corresponding instance of the MappedClassInformation class,
+     * then a new one will be created and putted to the cache.
+     *
+     * @param mappedClass A Class, whose annotated fields will be used for creating corresponding entity.
+     * @return Instance of the MappedClassInformation class that describes
+     *         all information about a particular class (methods, constructors etc.).
+     * @throws NoSuchMethodException If there is no appropriate method to invoke
+     * */
     @SuppressWarnings("unchecked")
     private MappedClassInformation getMappedClassInformation(Class mappedClass) throws NoSuchMethodException {
         if (cache.containsKey(mappedClass)) {
@@ -906,6 +940,15 @@ public class DatabaseConnection {
         return classInformation;
     }
 
+    /**
+     * Returns field's value of the particular object that was annotated {@literal Column}
+     * annotation with primaryKey = true by invoking getter method.
+     *
+     * @param object Entity class which method is used to be invoked.
+     * @throws InvocationTargetException If there is any problem with invocation.
+     * @throws NoSuchMethodException If there is no appropriate method to invoke
+     * @throws IllegalAccessException If there is some problem with accessibility.
+     * */
     private Object getPrimaryKeyMethodValue(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
 

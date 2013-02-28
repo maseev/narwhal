@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
 /**
  * The <code>Column</code> annotation marks particular
  * field of the class which maps on the column of the database table.
