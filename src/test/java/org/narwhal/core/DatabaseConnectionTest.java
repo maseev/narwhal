@@ -50,12 +50,16 @@ public class DatabaseConnectionTest {
 
     @Test
     public void deleteTest() {
-
+        
     }
 
     @Test
-    public void executeUpdateTest() {
-        
+    public void executeUpdateTest() throws SQLException {
+        String queryName = "Doe";
+        int expectedRowAffected = 1;
+        int result = connection.executeUpdate("UPDATE Person SET name = FunnyName WHERE name = ?", queryName);
+
+        Assert.assertEquals(expectedRowAffected, result);
     }
 
     @Test
