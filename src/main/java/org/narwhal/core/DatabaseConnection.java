@@ -420,14 +420,17 @@ public class DatabaseConnection {
 
     public int create(Object object) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, SQLException {
         Object[] parameters = getParameters(object);
-        MappedClassInformation classInformation = cache.get(object.getClass());
+        MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery('C');
 
         return executeUpdate(query, parameters);
     }
 
-    public <T> T read(Class<T> mappedClass, Object column) {
+    public <T> T read(Class<T> mappedClass, Object primaryKey) throws NoSuchMethodException, SQLException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        MappedClassInformation classInformation = getMappedClassInformation(mappedClass);
+        String query = classInformation.getQuery('R');
 
+        return executeQuery(query, mappedClass, primaryKey);
     }
 
     public int udpate(Object object) {
