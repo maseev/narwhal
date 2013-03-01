@@ -16,34 +16,37 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public class DatabaseConnectionTest {
 
-    private DatabaseConnection connection;
+    private static String driver = "com.mysql.jdbc.Driver";
+    private static String url = "jdbc:mysql://localhost/bank";
+    private static String username = "lrngsql";
+    private static String password = "lrngsql";
 
-
-    public DatabaseConnectionTest() throws SQLException, ClassNotFoundException {
-        String driver = "com.mysql.jdbc.Driver";
-        String url = "jdbc:mysql://localhost/bank";
-        String username = "lrngsql";
-        String password = "lrngsql";
-        DatabaseInformation information = new DatabaseInformation(driver, url, username, password);
-        connection  = new DatabaseConnection(information);
-    }
 
     @Test
-    public void transactionMethodsTest() throws SQLException {
+    public void transactionMethodsTest() throws SQLException, ClassNotFoundException {
+        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseConnection connection = null;
         int expectedRowAffected = 3;
         int result = 0;
 
         try {
-            connection.beginTransaction();
+            connection = new DatabaseConnection(databaseInformation);
 
-            result += connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", null, "Test");
-            result += connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "TestTest", "Test");
-            result += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
+            try {
+                connection.beginTransaction();
 
-            connection.commit();
-        } catch (SQLException ex){
-            ex.printStackTrace();
-            connection.rollback();
+                result += connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", null, "Test");
+                result += connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "TestTest", "Test");
+                result += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
+
+                connection.commit();
+            } catch (Exception ex) {
+                connection.rollback();
+            }
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
         }
 
         try {
@@ -54,10 +57,21 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void createTest() throws InvocationTargetException, NoSuchMethodException, SQLException, IllegalAccessException {
+    public void createTest() throws InvocationTargetException, NoSuchMethodException, SQLException, IllegalAccessException, ClassNotFoundException {
+        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseConnection connection = null;
         Person person = new Person(null, "TestPerson");
         int expectedRowAffected = 1;
-        int result = connection.create(person);
+        int result;
+
+        try {
+            connection = new DatabaseConnection(databaseInformation);
+            result = connection.create(person);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
 
         try {
             Assert.assertEquals(expectedRowAffected, result);
@@ -68,8 +82,19 @@ public class DatabaseConnectionTest {
 
     @Test
     public void readTest() throws InvocationTargetException, NoSuchMethodException,
-            InstantiationException, SQLException, IllegalAccessException {
-        Person person = connection.read(Person.class, 1);
+            InstantiationException, SQLException, IllegalAccessException, ClassNotFoundException {
+        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseConnection connection = null;
+        Person person;
+
+        try {
+            connection = new DatabaseConnection(databaseInformation);
+            person = connection.read(Person.class, 1);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
 
         try {
             Assert.assertEquals("John", person.getName());
@@ -80,13 +105,23 @@ public class DatabaseConnectionTest {
 
     @Test
     public void updateTest() throws SQLException, NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException {
+            IllegalAccessException, InvocationTargetException, ClassNotFoundException {
+        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseConnection connection = null;
         Person person = new Person(1, "John Doe");
         int expectedRowAffected = 1;
-        int result = connection.update(person);
+        int result;
 
         try {
-            connection.update(person);
+            connection = new DatabaseConnection(databaseInformation);
+            result = connection.update(person);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+
+        try {
             Assert.assertEquals(expectedRowAffected, result);
         } finally {
             restoreDatabase();
@@ -95,10 +130,21 @@ public class DatabaseConnectionTest {
 
     @Test
     public void deleteTest() throws SQLException, NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException {
+            IllegalAccessException, InvocationTargetException, ClassNotFoundException {
+        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseConnection connection = null;
         Person person = new Person(1, "John");
         int expectedRowAffected = 1;
-        int result = connection.delete(person);
+        int result;
+
+        try {
+            connection = new DatabaseConnection(databaseInformation);
+            result = connection.delete(person);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
 
         try {
             Assert.assertEquals(expectedRowAffected, result);
@@ -108,10 +154,21 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void executeUpdateTest() throws SQLException {
+    public void executeUpdateTest() throws SQLException, ClassNotFoundException {
+        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseConnection connection = null;
         int doeId = 2;
         int expectedRowAffected = 1;
-        int result = connection.executeUpdate("UPDATE Person SET name = ? WHERE id = ?", "FunnyName", doeId);
+        int result;
+
+        try {
+            connection = new DatabaseConnection(databaseInformation);
+            result = connection.executeUpdate("UPDATE Person SET name = ? WHERE id = ?", "FunnyName", doeId);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
 
         try {
             Assert.assertEquals(expectedRowAffected, result);
@@ -122,10 +179,21 @@ public class DatabaseConnectionTest {
 
     @Test
     public void executeQueryTest() throws SQLException, IllegalAccessException,
-            InstantiationException, NoSuchMethodException, InvocationTargetException {
+            InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
+        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseConnection connection = null;
         String expectedName = "John";
+        Person person;
         int joeId = 1;
-        Person person = connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, joeId);
+
+        try {
+            connection = new DatabaseConnection(databaseInformation);
+            person = connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, joeId);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
 
         Assert.assertNotNull(person);
         Assert.assertEquals(expectedName, person.getName());
@@ -134,26 +202,47 @@ public class DatabaseConnectionTest {
     @Test
     public void executeQueryForCollectionTest() throws SQLException, ClassNotFoundException,
             NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        List<Person> persons = connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
+        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseConnection connection = null;
+        List<Person> persons;
         int expectedSize = 2;
 
-        Assert.assertNotNull(persons);
+        try {
+            connection = new DatabaseConnection(databaseInformation);
+            persons = connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+
         Assert.assertEquals(expectedSize, persons.size());
         Assert.assertEquals("John", persons.get(0).getName());
         Assert.assertEquals("Doe", persons.get(1).getName());
     }
 
-    private void restoreDatabase() throws SQLException {
+    private void restoreDatabase() throws SQLException, ClassNotFoundException {
+        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseConnection connection = null;
+
         try {
-            connection.beginTransaction();
+            connection = new DatabaseConnection(databaseInformation);
 
-            connection.executeUpdate("DELETE FROM Person");
-            connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", 1, "John");
-            connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", 2,  "Doe");
+            try {
+                connection.beginTransaction();
 
-            connection.commit();
+                connection.executeUpdate("DELETE FROM Person");
+                connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", 1, "John");
+                connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", 2,  "Doe");
+
+                connection.commit();
+            } catch (SQLException ex) {
+                connection.rollback();
+            }
         } finally {
-            connection.rollback();
+            if (connection != null) {
+                connection.close();
+            }
         }
     }
 }

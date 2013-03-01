@@ -305,10 +305,13 @@ public class DatabaseConnection {
             List<Method> methods = new ArrayList<Method>();
 
             for (Field field : fields) {
-                if (!field.getAnnotation(Column.class).primaryKey()) {
+                /*if (!field.getAnnotation(Column.class).primaryKey()) {
                     String methodName = getGetMethodName(field.getName());
                     methods.add(mappedClass.getMethod(methodName));
-                }
+                }*/
+
+                String methodName = getGetMethodName(field.getName());
+                methods.add(mappedClass.getMethod(methodName));
             }
 
             return methods;
@@ -327,7 +330,7 @@ public class DatabaseConnection {
             for (Field field : fields) {
                 if (field.getAnnotation(Column.class).primaryKey()) {
                     String methodName = getGetMethodName(field.getName());
-                    return mappedClass.getMethod(methodName, field.getType());
+                    return mappedClass.getMethod(methodName);
                 }
             }
 
@@ -365,7 +368,7 @@ public class DatabaseConnection {
             builder.append(" VALUES (");
 
             for (int i = 0; i < columns.size(); ++i) {
-                if (i > 0 && i < columns.size() - 1) {
+                if (i > 0) {
                     builder.append(',');
                 }
 
@@ -417,17 +420,17 @@ public class DatabaseConnection {
         private String makeUpdateQuery(String tableName) {
             StringBuilder builder = new StringBuilder("UPDATE ");
             builder.append(tableName);
+            builder.append(" SET ");
 
             for (int i = 0; i < columns.size(); ++i) {
-                if (i > 0 && i < columns.size() - 1) {
+                if (i > 0) {
                     builder.append(',');
                 }
 
-                builder.append("SET ");
                 builder.append(columns.get(i));
-                builder.append(" = ? ");
+                builder.append(" = ?");
             }
-            builder.append("WHERE ");
+            builder.append(" WHERE ");
             builder.append(primaryColumnName);
             builder.append(" = ?");
 
@@ -567,8 +570,7 @@ public class DatabaseConnection {
      * */
     public int create(Object object) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, SQLException {
         List<Object> parameters = new ArrayList<Object>();
-        parameters.add(getPrimaryKeyMethodValue(object));
-        parameters.add(Arrays.asList(getParameters(object)));
+        parameters.addAll(Arrays.asList(getParameters(object)));
 
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.CREATE);
@@ -606,8 +608,9 @@ public class DatabaseConnection {
      * */
     public int update(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
         List<Object> parameters = new ArrayList<Object>();
-        parameters.add(Arrays.asList(getParameters(object)));
+        parameters.addAll(Arrays.asList(getParameters(object)));
         parameters.add(getPrimaryKeyMethodValue(object));
+
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.UPDATE);
 
