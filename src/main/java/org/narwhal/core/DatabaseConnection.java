@@ -1010,19 +1010,23 @@ public class DatabaseConnection {
      * @param resultSet Result set that was retrieved from the database.
      * @param classInformation Instance of MappedClassInformation that holds all information about mapped class.
      * @return Instance of the class that has been pointed as a second parameter.
-     * @throws IllegalAccessException If there is some problem with accessibility.
-     * @throws InvocationTargetException If there is any problem with invocation.
-     * @throws InstantiationException If there is any problem with creating object.
      * @throws SQLException If any database access problems happened.
      * */
-     private <T> T createEntitySupporter(ResultSet resultSet, MappedClassInformation<T> classInformation) throws IllegalAccessException, InvocationTargetException, InstantiationException, SQLException {
+     private <T> T createEntitySupporter(ResultSet resultSet, MappedClassInformation<T> classInformation) throws SQLException {
         List<Method> setMethods = classInformation.getSetMethods();
         List<String> columns = classInformation.getColumns();
-        T result = classInformation.getConstructor().newInstance();
+        T result = null;
 
-        for (int i = 0; i < columns.size(); ++i) {
-            Object data = resultSet.getObject(columns.get(i));
-            setMethods.get(i).invoke(result, data);
+        try {
+            result = classInformation.getConstructor().newInstance();
+
+            for (int i = 0; i < columns.size(); ++i) {
+                Object data = resultSet.getObject(columns.get(i));
+                setMethods.get(i).invoke(result, data);
+            }
+        } catch (ReflectiveOperationException ex) {
+            logger.error("Reflective operation exception has occurred");
+            System.exit(-1);
         }
 
         return result;
