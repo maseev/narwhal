@@ -520,9 +520,8 @@ public class DatabaseConnection {
      * @param databaseInformation instance of {@code DatabaseInformation} class that includes
      *                            all the information for making connection to the database.
      * @throws SQLException If any database access problems happened.
-     * @throws ClassNotFoundException If any problem with register JDBC driver occurs.
      * */
-    public DatabaseConnection(DatabaseInformation databaseInformation) throws ClassNotFoundException, SQLException {
+    public DatabaseConnection(DatabaseInformation databaseInformation) throws SQLException {
         connection = getConnection(databaseInformation);
     }
 
@@ -564,11 +563,8 @@ public class DatabaseConnection {
      * @param object Entity object that should be persisted in the database.
      * @return Number of rows that have been affected after performing sql query.
      * @throws SQLException If any database access problems happened.
-     * @throws InvocationTargetException If there is any problem with invocation.
-     * @throws NoSuchMethodException If there is no appropriate method to invoke
-     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
-    public int create(Object object) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, SQLException {
+    public int create(Object object) throws SQLException {
         List<Object> parameters = new ArrayList<Object>();
         parameters.addAll(Arrays.asList(getParameters(object)));
 
@@ -584,12 +580,8 @@ public class DatabaseConnection {
      * @param mappedClass A Class, whose annotated fields will be used for creating corresponding entity.
      * @param primaryKey primary key that is used to find a particular row in the database.
      * @throws SQLException If any database access problems happened.
-     * @throws InvocationTargetException If there is any problem with invocation.
-     * @throws NoSuchMethodException If there is no appropriate method to invoke
-     * @throws InstantiationException If there is any problem with creating object.
-     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
-    public <T> T read(Class<T> mappedClass, Object primaryKey) throws NoSuchMethodException, SQLException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    public <T> T read(Class<T> mappedClass, Object primaryKey) throws SQLException {
         MappedClassInformation classInformation = getMappedClassInformation(mappedClass);
         String query = classInformation.getQuery(QueryType.READ);
 
@@ -602,11 +594,8 @@ public class DatabaseConnection {
      * @param object entity which data will be used to update row in the database.
      * @return Number of rows that have been affected after performing sql query.
      * @throws SQLException If any database access problems happened.
-     * @throws InvocationTargetException If there is any problem with invocation.
-     * @throws NoSuchMethodException If there is no appropriate method to invoke
-     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
-    public int update(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
+    public int update(Object object) throws SQLException {
         List<Object> parameters = new ArrayList<Object>();
         parameters.addAll(Arrays.asList(getParameters(object)));
         parameters.add(getPrimaryKeyMethodValue(object));
@@ -623,11 +612,8 @@ public class DatabaseConnection {
      * @param  object entity that will be deleted from the database.
      * @return Number of rows that have been affected after performing sql query.
      * @throws SQLException If any database access problems happened.
-     * @throws InvocationTargetException If there is any problem with invocation.
-     * @throws NoSuchMethodException If there is no appropriate method to invoke
-     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
-    public int delete(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, SQLException {
+    public int delete(Object object) throws SQLException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.DELETE);
         Object primaryKey = getPrimaryKeyMethodValue(object);
@@ -712,12 +698,8 @@ public class DatabaseConnection {
      *                   symbols in the SQL query parameter.
      * @return Mapped object that was created by based on the data from the result set.
      * @throws SQLException If any database access problems happened.
-     * @throws InvocationTargetException If there is any problem with invocation.
-     * @throws NoSuchMethodException If there is no appropriate method to invoke
-     * @throws InstantiationException If there is any problem with creating object.
-     * @throws IllegalAccessException If there is some problem with object fields accessibility.
      * */
-    public <T> T executeQuery(String query, Class<T> mappedClass, Object... parameters) throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public <T> T executeQuery(String query, Class<T> mappedClass, Object... parameters) throws SQLException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         T result = null;
@@ -772,12 +754,8 @@ public class DatabaseConnection {
      *                   symbols in the SQL query parameter.
      * @return A List of the entity objects. Objects have type that was pointed as a second parameter.
      * @throws SQLException If any database access problems happened.
-     * @throws InvocationTargetException If there is any problem with invocation.
-     * @throws NoSuchMethodException If there is no appropriate method to invoke
-     * @throws InstantiationException If there is any problem with creating object.
-     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
-    public <T> List<T> executeQueryForCollection(String query, Class<T> mappedClass, Object... parameters) throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public <T> List<T> executeQueryForCollection(String query, Class<T> mappedClass, Object... parameters) throws SQLException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         List<T> collection = new ArrayList<T>();
@@ -808,9 +786,8 @@ public class DatabaseConnection {
      * @param databaseInformation Instance of the DatabaseInformation class that keeps all the information
      *                            about database connection like database driver's name, url, username and password.
      * @throws SQLException If any database access problems happened.
-     * @throws ClassNotFoundException If any problem with register JDBC driver occurs.
      * */
-     public void connect(DatabaseInformation databaseInformation) throws SQLException, ClassNotFoundException {
+     public void connect(DatabaseInformation databaseInformation) throws SQLException {
         connection = getConnection(databaseInformation);
      }
 
@@ -848,18 +825,20 @@ public class DatabaseConnection {
      *
      * @param object Entity class whose data fields are used to create array of the parameters.
      * @return Array of the parameters.
-     * @throws InvocationTargetException If there is any problem with invocation.
-     * @throws NoSuchMethodException If there is no appropriate method to invoke
-     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
     @SuppressWarnings("unchecked")
-    private Object[] getParameters(Object object) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    private Object[] getParameters(Object object) {
         List<Object> parameters = new ArrayList<Object>();
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         List<Method> getMethods = classInformation.getGetMethods();
 
-        for (Method method : getMethods) {
-            parameters.add(method.invoke(object));
+        try {
+            for (Method method : getMethods) {
+                parameters.add(method.invoke(object));
+            }
+        } catch (ReflectiveOperationException ex) {
+            logger.error("Reflective operation exception has occurred", ex);
+            System.exit(-1);
         }
 
         return parameters.toArray();
@@ -929,16 +908,22 @@ public class DatabaseConnection {
      * @param mappedClass A Class, whose annotated fields will be used for creating corresponding entity.
      * @return Instance of the MappedClassInformation class that describes
      *         all information about a particular class (methods, constructors etc.).
-     * @throws NoSuchMethodException If there is no appropriate method to invoke
      * */
     @SuppressWarnings("unchecked")
-    private MappedClassInformation getMappedClassInformation(Class mappedClass) throws NoSuchMethodException {
+    private MappedClassInformation getMappedClassInformation(Class mappedClass) {
         if (cache.containsKey(mappedClass)) {
            return cache.get(mappedClass);
         }
 
-        MappedClassInformation classInformation = new MappedClassInformation(mappedClass);
-        cache.put(mappedClass, classInformation);
+        MappedClassInformation classInformation = null;
+
+        try {
+            classInformation = new MappedClassInformation(mappedClass);
+            cache.put(mappedClass, classInformation);
+        } catch (NoSuchMethodException ex) {
+            logger.error("Reflective operation exception has occurred", ex);
+            System.exit(-1);
+        }
 
         return classInformation;
     }
@@ -948,14 +933,19 @@ public class DatabaseConnection {
      * annotation with primaryKey = true by invoking getter method.
      *
      * @param object Entity class which method is used to be invoked.
-     * @throws InvocationTargetException If there is any problem with invocation.
-     * @throws NoSuchMethodException If there is no appropriate method to invoke
-     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
-    private Object getPrimaryKeyMethodValue(Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    private Object getPrimaryKeyMethodValue(Object object) {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
+        Object primaryKeyGetMethodValue = null;
 
-        return classInformation.getPrimaryKeyGetMethod().invoke(object);
+        try {
+            primaryKeyGetMethodValue = classInformation.getPrimaryKeyGetMethod().invoke(object);
+        } catch (ReflectiveOperationException ex) {
+            logger.error("Reflective operation exception has occurred", ex);
+            System.exit(-1);
+        }
+
+        return primaryKeyGetMethodValue;
     }
 
     /**
@@ -965,15 +955,19 @@ public class DatabaseConnection {
      *                            about database connection like database driver's name, url, username and password.
      * @return A new Connection object associated with particular database.
      * @throws SQLException If any database access problems happened.
-     * @throws ClassNotFoundException If any problem with register JDBC driver occurs.
      * */
-    private Connection getConnection(DatabaseInformation databaseInformation) throws ClassNotFoundException, SQLException {
+    private Connection getConnection(DatabaseInformation databaseInformation) throws SQLException {
         String url = databaseInformation.getUrl();
         String username = databaseInformation.getUsername();
         String password = databaseInformation.getPassword();
 
-        Class.forName(databaseInformation.getDriver());
-        connection = DriverManager.getConnection(url, username, password);
+        try {
+            Class.forName(databaseInformation.getDriver());
+            connection = DriverManager.getConnection(url, username, password);
+        } catch (ClassNotFoundException ex) {
+            logger.error("Class cannot be located", ex);
+            System.exit(-1);
+        }
 
         logger.info("Database connection has been opened");
 
@@ -989,13 +983,9 @@ public class DatabaseConnection {
      * @param mappedClass Class, whose annotated fields will be used for creating corresponding entity.
      * @return Instance of the class that has been pointed as a second parameter.
      * @throws SQLException If any database access problems happened.
-     * @throws InvocationTargetException If there is any problem with invocation.
-     * @throws NoSuchMethodException If there is no appropriate method to invoke
-     * @throws InstantiationException If there is any problem with creating object.
-     * @throws IllegalAccessException If there is some problem with accessibility.
      * */
      @SuppressWarnings("unchecked")
-     private <T> T createEntity(ResultSet resultSet, Class<T> mappedClass) throws SQLException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+     private <T> T createEntity(ResultSet resultSet, Class<T> mappedClass) throws SQLException {
         return (T) createEntitySupporter(resultSet, getMappedClassInformation(mappedClass));
      }
 
@@ -1025,7 +1015,7 @@ public class DatabaseConnection {
                 setMethods.get(i).invoke(result, data);
             }
         } catch (ReflectiveOperationException ex) {
-            logger.error("Reflective operation exception has occurred");
+            logger.error("Reflective operation exception has occurred", ex);
             System.exit(-1);
         }
 
