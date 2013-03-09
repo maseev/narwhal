@@ -23,5 +23,10 @@ public @interface Column {
      * */
     String value();
 
+    /**
+     * Checks whether a class field is a primary key or not.
+     *
+     * @return True if class field is a primary key. False otherwise.
+     * */
     boolean primaryKey() default false;
 }
