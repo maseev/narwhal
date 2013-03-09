@@ -26,7 +26,7 @@ Notice! All the mapped classes have to use annotation to map fields to the corre
 ```java
 @Table("person")
 public class Person {
-	@Column("person_id")
+	@Column(value = "person_id", primaryKey = true)
 	private int id;
 	@Column("name")
 	private String name;
