@@ -21,7 +21,7 @@ public class ConnectionPoolTest {
 
 
     @Test
-    public void setSizeTest() throws ClassNotFoundException {
+    public void setSizeTest() {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         ConnectionPool pool;
         int expectedPoolSize = 10;

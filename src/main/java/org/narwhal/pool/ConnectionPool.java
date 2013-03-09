@@ -40,9 +40,8 @@ public class ConnectionPool {
      * @param databaseInformation instance of {@code DatabaseInformation} class that includes
      *                            all the information for making connection to the database.
      * @throws SQLException If any database access problems happened.
-     * @throws ClassNotFoundException
      * */
-    public ConnectionPool(DatabaseInformation databaseInformation) throws SQLException, ClassNotFoundException {
+    public ConnectionPool(DatabaseInformation databaseInformation) throws SQLException {
         this(databaseInformation, DEFAULT_POOL_SIZE, DEFAULT_ACQUIRE_INCREMENT);
     }
 
@@ -56,10 +55,9 @@ public class ConnectionPool {
      *                            all the information for making connection to the database.
      * @param size the size of the pool.
      * @param acquireIncrement the acquire increment of the pool.
-     * @throws ClassNotFoundException If any problem with register JDBC driver occurs.
      * @throws SQLException If any database access problems happened.
      * */
-    public ConnectionPool(DatabaseInformation databaseInformation, int size, int acquireIncrement) throws SQLException, ClassNotFoundException {
+    public ConnectionPool(DatabaseInformation databaseInformation, int size, int acquireIncrement) throws SQLException {
         if (size < 1) {
             throw new IllegalArgumentException("Argument value must be equal or greater than 1: " + size);
         }
@@ -84,9 +82,8 @@ public class ConnectionPool {
      *
      * @return DatabaseConnection object.
      * @throws SQLException If any database access problems happened.
-     * @throws ClassNotFoundException If any problem with register JDBC driver occurs.
      * */
-    public DatabaseConnection getConnection() throws SQLException, ClassNotFoundException {
+    public DatabaseConnection getConnection() throws SQLException {
         connectionsLock.lock();
         try {
             if (connections.isEmpty()) {
@@ -162,9 +159,10 @@ public class ConnectionPool {
      * Sets new size of the pool. If the new size of the pool is smaller than initial size,
      * then pool will be condensed to the new size. Unnecessary connections will be closed.
      *
+     * @throws SQLException If any database access problems happened.
      * @param newSize The new pool's size.
      * */
-    public void setSize(int newSize) throws SQLException, ClassNotFoundException {
+    public void setSize(int newSize) throws SQLException {
         if (newSize < 1) {
             throw new IllegalArgumentException("Argument value must be equal or greater than 1: " + newSize);
         }
@@ -230,10 +228,9 @@ public class ConnectionPool {
      *
      * @param requiredSize Number of the database connection.
      * @return List of the database connections.
-     * @throws ClassNotFoundException If any problem with register JDBC driver occurs.
      * @throws SQLException If any database access problems happened.
      * */
-    private List<DatabaseConnection> createDatabaseConnections(int requiredSize) throws ClassNotFoundException, SQLException {
+    private List<DatabaseConnection> createDatabaseConnections(int requiredSize) throws SQLException {
         List<DatabaseConnection> conn = new ArrayList<DatabaseConnection>(requiredSize);
 
         for (int i = 0; i < requiredSize; ++i) {

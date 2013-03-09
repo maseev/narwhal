@@ -23,7 +23,7 @@ public class DatabaseConnectionTest {
 
 
     @Test
-    public void transactionMethodsTest() throws SQLException, ClassNotFoundException {
+    public void transactionMethodsTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         int expectedRowAffected = 3;
@@ -57,7 +57,7 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void createTest() throws InvocationTargetException, NoSuchMethodException, SQLException, IllegalAccessException, ClassNotFoundException {
+    public void createTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         Person person = new Person(null, "TestPerson");
@@ -81,8 +81,7 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void readTest() throws InvocationTargetException, NoSuchMethodException,
-            InstantiationException, SQLException, IllegalAccessException, ClassNotFoundException {
+    public void readTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         Person person;
@@ -104,8 +103,7 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void updateTest() throws SQLException, NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException, ClassNotFoundException {
+    public void updateTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         Person person = new Person(1, "John Doe");
@@ -129,8 +127,7 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void deleteTest() throws SQLException, NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException, ClassNotFoundException {
+    public void deleteTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         Person person = new Person(1, "John");
@@ -154,7 +151,7 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void executeUpdateTest() throws SQLException, ClassNotFoundException {
+    public void executeUpdateTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         int doeId = 2;
@@ -178,8 +175,7 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void executeQueryTest() throws SQLException, IllegalAccessException,
-            InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
+    public void executeQueryTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         String expectedName = "John";
@@ -200,8 +196,7 @@ public class DatabaseConnectionTest {
     }
 
     @Test
-    public void executeQueryForCollectionTest() throws SQLException, ClassNotFoundException,
-            NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    public void executeQueryForCollectionTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         List<Person> persons;
@@ -221,7 +216,7 @@ public class DatabaseConnectionTest {
         Assert.assertEquals("Doe", persons.get(1).getName());
     }
 
-    private void restoreDatabase() throws SQLException, ClassNotFoundException {
+    private void restoreDatabase() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
 
