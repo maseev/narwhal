@@ -632,7 +632,7 @@ public class DatabaseConnection {
      * </p>
      *
      * As you could see in the example above, this method takes the string representation of SQL update query
-     * and the arbitrary number of parameters.
+     * and the variable number of parameters.
      * This method combines two parameters, so let's assume that <code>id </code> variable is assigned to 1
      * and <code>name</code> variable is assigned to "John".
      *
@@ -681,7 +681,7 @@ public class DatabaseConnection {
      * </p>
      *
      * As you could see in the example above, this method takes the string representation of SQL update query
-     * and the arbitrary number of parameters. Its also takes a type of class that will be used for building result object.
+     * and the variable number of parameters. Its also takes a type of class that will be used for building result object.
      * This method combines two parameters, so let's assume that <code>id </code> variable is assigned to 1
      *
      * Then you'll get the following SQL query:
@@ -737,7 +737,7 @@ public class DatabaseConnection {
      * </p>
      *
      * As you could see in the example above, this method takes the string representation of SQL update query
-     * and the arbitrary number of parameters. Its also takes a type of class that will be used for building result object.
+     * and the variable number of parameters. Its also takes a type of class that will be used for building result object.
      * This method combines two parameters, so let's assume that <code>id </code> variable is assigned to 1
      *
      * Then you'll get the following SQL query:
@@ -845,7 +845,7 @@ public class DatabaseConnection {
     }
 
     /**
-     * Builds prepared statement. This method takes the string representation of SQL query and the arbitrary
+     * Builds prepared statement. This method takes the string representation of SQL query and the variable
      * number of wildcard parameters.
      * This method substitutes every wildcard symbol in the SQL query on the corresponding wildcard
      * parameter that was placed like the second and subsequent argument after SQL query.
