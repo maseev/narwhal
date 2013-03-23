@@ -37,7 +37,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *     <p><code>
  *         {@literal @}Table("person")
  *         public class Person {
- *             {@literal @}Column("person_id")
+ *             {@literal @}Column(value = "person_id", primaryKey = true)
  *             private int id;
  *             {@literal @}Column("name)
  *             private String name;
