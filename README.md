@@ -113,7 +113,8 @@ try {
 	connection.commit();
 	
 	Person person = connection.read(Person.class, 1);
-} finally {
+} catch (SQLException ex) {
+	ex.printStackTrace();
 	connection.rollback();
 }
 ```
