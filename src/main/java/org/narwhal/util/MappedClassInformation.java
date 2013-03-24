@@ -177,7 +177,7 @@ public class MappedClassInformation<T> {
      * Constructs string representation method by using field name and a prefix (get, set).
      *
      * @param fieldName String representation of the class field.
-     * @param prefix Prefix that uses to create whether getter or setter.
+     * @param prefix Prefix that uses to persist whether getter or setter.
      * @return String representation of the class method.
      * */
     private String getMethodName(String fieldName, String prefix) {

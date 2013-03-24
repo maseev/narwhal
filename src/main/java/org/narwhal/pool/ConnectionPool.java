@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The <code>ConnectionPool</code> class implements
- * basic functionality that allows end-users create
+ * basic functionality that allows end-users persist
  * variable number of database connection.
  * This class provides database connection pool and
  * takes care of lifetime and resource management.

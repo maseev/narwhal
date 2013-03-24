@@ -3,6 +3,8 @@ package org.narwhal.bean;
 import org.narwhal.annotation.Column;
 import org.narwhal.annotation.Table;
 
+import java.util.Date;
+
 /**
  * @author Miron Aseev
  */
@@ -13,14 +15,17 @@ public class Person {
     private Integer id;
     @Column("NAME")
     private String name;
+    @Column("BIRTHDAY")
+    private Date birthday;
 
 
     public Person() {
     }
 
-    public Person(Integer id, String name) {
+    public Person(Integer id, String name, Date birthday) {
         this.id = id;
         this.name = name;
+        this.birthday = birthday;
     }
 
     public Integer getId() {
@@ -37,5 +42,13 @@ public class Person {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 }

@@ -6,8 +6,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.narwhal.bean.Person;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -20,6 +21,8 @@ public class DatabaseConnectionTest {
     private static String url = "jdbc:mysql://localhost/bank";
     private static String username = "lrngsql";
     private static String password = "lrngsql";
+    private static Date johnBirthday = new GregorianCalendar(1990, 6, 9).getTime();
+    private static Date doeBirthday = new GregorianCalendar(1993, 3, 24).getTime();
 
 
     @Test
@@ -35,7 +38,7 @@ public class DatabaseConnectionTest {
             try {
                 connection.beginTransaction();
 
-                result += connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", null, "Test");
+                result += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", null, "Test", new Date());
                 result += connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "TestTest", "Test");
                 result += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
 
@@ -60,13 +63,13 @@ public class DatabaseConnectionTest {
     public void createTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
-        Person person = new Person(null, "TestPerson");
+        Person person = new Person(null, "TestPerson", new Date());
         int expectedRowAffected = 1;
         int result;
 
         try {
             connection = new DatabaseConnection(databaseInformation);
-            result = connection.create(person);
+            result = connection.persist(person);
         } finally {
             if (connection != null) {
                 connection.close();
@@ -97,6 +100,7 @@ public class DatabaseConnectionTest {
 
         try {
             Assert.assertEquals("John", person.getName());
+            Assert.assertEquals(johnBirthday, person.getBirthday());
         } finally {
             restoreDatabase();
         }
@@ -106,7 +110,7 @@ public class DatabaseConnectionTest {
     public void updateTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
-        Person person = new Person(1, "John Doe");
+        Person person = new Person(1, "John Doe", new Date());
         int expectedRowAffected = 1;
         int result;
 
@@ -130,7 +134,7 @@ public class DatabaseConnectionTest {
     public void deleteTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
-        Person person = new Person(1, "John");
+        Person person = new Person(1, "John", new Date());
         int expectedRowAffected = 1;
         int result;
 
@@ -227,8 +231,8 @@ public class DatabaseConnectionTest {
                 connection.beginTransaction();
 
                 connection.executeUpdate("DELETE FROM Person");
-                connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", 1, "John");
-                connection.executeUpdate("INSERT INTO Person (id, name) VALUES (?, ?)", 2,  "Doe");
+                connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 1, "John", johnBirthday);
+                connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 2,  "Doe", doeBirthday);
 
                 connection.commit();
             } catch (SQLException ex) {

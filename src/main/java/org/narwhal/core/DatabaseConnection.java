@@ -20,7 +20,7 @@ import java.util.List;
  * DatabaseConnection class also manages all resources like database connection,
  * prepared statements, result sets etc.
  * It also provides basic logging using slf4j library for this case.
- * This class also supports basic transaction management and convenient methods for create,
+ * This class also supports basic transaction management and convenient methods for persist,
  * update, delete, read entity from the database.
  * </p>
  *
@@ -118,7 +118,7 @@ public class DatabaseConnection {
      * @return Number of rows that have been affected after performing sql query.
      * @throws SQLException If any database access problems happened.
      * */
-    public int create(Object object) throws SQLException {
+    public int persist(Object object) throws SQLException {
         List<Object> parameters = new ArrayList<>();
         parameters.addAll(Arrays.asList(getParameters(object)));
 
@@ -377,7 +377,7 @@ public class DatabaseConnection {
     /**
      * Returns array of the parameters for the subsequent creating prepared statement.
      *
-     * @param object Entity class whose data fields are used to create array of the parameters.
+     * @param object Entity class whose data fields are used to persist array of the parameters.
      * @return Array of the parameters.
      * */
     @SuppressWarnings("unchecked")
