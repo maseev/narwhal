@@ -231,7 +231,7 @@ public class ConnectionPool {
      * @throws SQLException If any database access problems happened.
      * */
     private List<DatabaseConnection> createDatabaseConnections(int requiredSize) throws SQLException {
-        List<DatabaseConnection> conn = new ArrayList<DatabaseConnection>(requiredSize);
+        List<DatabaseConnection> conn = new ArrayList<>(requiredSize);
 
         for (int i = 0; i < requiredSize; ++i) {
             conn.add(new DatabaseConnection(databaseInformation));

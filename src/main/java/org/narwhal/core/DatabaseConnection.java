@@ -119,7 +119,7 @@ public class DatabaseConnection {
      * @throws SQLException If any database access problems happened.
      * */
     public int create(Object object) throws SQLException {
-        List<Object> parameters = new ArrayList<Object>();
+        List<Object> parameters = new ArrayList<>();
         parameters.addAll(Arrays.asList(getParameters(object)));
 
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
@@ -150,7 +150,7 @@ public class DatabaseConnection {
      * @throws SQLException If any database access problems happened.
      * */
     public int update(Object object) throws SQLException {
-        List<Object> parameters = new ArrayList<Object>();
+        List<Object> parameters = new ArrayList<>();
         parameters.addAll(Arrays.asList(getParameters(object)));
         parameters.add(getPrimaryKeyMethodValue(object));
 
@@ -312,7 +312,7 @@ public class DatabaseConnection {
     public <T> List<T> executeQueryForCollection(String query, Class<T> mappedClass, Object... parameters) throws SQLException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        List<T> collection = new ArrayList<T>();
+        List<T> collection = new ArrayList<>();
 
         try {
             try {
@@ -382,7 +382,7 @@ public class DatabaseConnection {
      * */
     @SuppressWarnings("unchecked")
     private Object[] getParameters(Object object) {
-        List<Object> parameters = new ArrayList<Object>();
+        List<Object> parameters = new ArrayList<>();
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         List<Method> getMethods = classInformation.getGetMethods();
 

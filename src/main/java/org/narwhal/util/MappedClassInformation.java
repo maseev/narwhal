@@ -108,7 +108,7 @@ public class MappedClassInformation<T> {
      * @return Columns of the database table.
      * */
     private List<String> getColumnsName(List<Field> annotatedFields) {
-        List<String> columns = new ArrayList<String>();
+        List<String> columns = new ArrayList<>();
 
         for (Field field : annotatedFields) {
             columns.add(field.getAnnotation(Column.class).value());
@@ -162,7 +162,7 @@ public class MappedClassInformation<T> {
      * */
     private <T, V extends Annotation> List<Field> getAnnotatedFields(Class<T> mappedClass, Class<V> annotation) {
         Field[] fields = mappedClass.getDeclaredFields();
-        List<Field> annotatedFields = new ArrayList<Field>();
+        List<Field> annotatedFields = new ArrayList<>();
 
         for (Field field : fields) {
             if (field.isAnnotationPresent(annotation)) {
@@ -217,7 +217,7 @@ public class MappedClassInformation<T> {
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
     private <T> List<Method> getSetMethods(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
-        List<Method> methods = new ArrayList<Method>();
+        List<Method> methods = new ArrayList<>();
 
         for (Field field : fields) {
             String methodName = getSetMethodName(field.getName());
@@ -237,14 +237,9 @@ public class MappedClassInformation<T> {
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
     private <T> List<Method> getGetMethods(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
-        List<Method> methods = new ArrayList<Method>();
+        List<Method> methods = new ArrayList<>();
 
         for (Field field : fields) {
-            /*if (!field.getAnnotation(Column.class).primaryKey()) {
-                String methodName = getGetMethodName(field.getName());
-                methods.add(mappedClass.getMethod(methodName));
-            }*/
-
             String methodName = getGetMethodName(field.getName());
             methods.add(mappedClass.getMethod(methodName));
         }
@@ -281,7 +276,7 @@ public class MappedClassInformation<T> {
      * */
     private <T> Map<QueryType, String> createQueries(Class<T> mappedClass) {
         String tableName = getTableName(mappedClass);
-        Map<QueryType, String> queries = new HashMap<QueryType, String>();
+        Map<QueryType, String> queries = new HashMap<>();
 
         queries.put(QueryType.CREATE, makeInsertQuery(tableName));
         queries.put(QueryType.READ,   makeSelectQuery(tableName));

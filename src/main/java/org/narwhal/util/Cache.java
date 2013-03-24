@@ -13,7 +13,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * */
 public class Cache {
 
-    private ReadWriteLock lock;
     private Lock readLock;
     private Lock writeLock;
     private Map<Class, MappedClassInformation> entityCache;
@@ -22,10 +21,10 @@ public class Cache {
      * Initializes a new instance of the Cache class.
      * */
     public Cache() {
-        lock = new ReentrantReadWriteLock();
+        ReadWriteLock lock = new ReentrantReadWriteLock();
         readLock = lock.readLock();
         writeLock = lock.writeLock();
-        entityCache = new HashMap<Class, MappedClassInformation>();
+        entityCache = new HashMap<>();
     }
 
     /**
