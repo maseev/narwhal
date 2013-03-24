@@ -30,6 +30,8 @@ public class Person {
 	private int id;
 	@Column("name")
 	private String name;
+	@Column("birthday")
+	private Date birthday;
 
 	public Person() {
 	}
@@ -72,16 +74,16 @@ Performing query to retrieve a particular entity:
 Person person = connection.executeQuery("SELECT id, name FROM person WHERE id = ?", Person.class, 1);
 ```	
 
-Performing query to retrieve a list of entities which satisfy the query:
+Performing query to retrieve a list of entities which satisfies the query:
 
 ```java
 List<Person> persons = connection.executeQueryForCollection("SELECT * FROM person", Person.class);
 ```	
 		
-Here are the examples of using insert, update and delete queries:
+Here is the example of using insert, update and delete queries:
 
 ```java
-connection.executeUpdate("INSERT INTO person (id, name) VALUES (?, ?)", null, "John");
+connection.executeUpdate("INSERT INTO person (id, name, birthday) VALUES (?, ?)", null, "John", new Date());
 connection.executeUpdate("UPDATE person SET id = 1 WHERE name = ?", "John");
 connection.executeUpdate("DELETE FROM person WHERE id > ?", 0);
 ```
