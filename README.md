@@ -9,14 +9,14 @@ The major aim is to create useful library that helps to retrieve particular info
 
 Features
 --------
-* Provides convinient methods for manupulating entity (persist, read, update, delete).
+* Provides convenient methods for manipulating entity (persist, read, update, delete).
 * Basic transaction management supports.
 * Supports connection pool;
 * Provides easy way to map class fields to the database columns through annotation;
 * Automatically creating instance of the mapped class;
-* Includes succint number of convenient methods that provide the easy way to use prepared statements to query database;
+* Includes succinct number of convenient methods that provide the easy way to use prepared statements to query database;
 * Automated work with resources (e.g. closing prepared statements, result set, closing database connection when some error occurs);
-* Provides logging support that makes easy to log any situations that occur when working with database (Narwhal's using [slf4j](http://www.slf4j.org/) to do logging).
+* Provides logging support that makes easy to log any situations that occur while working with database (Narwhal's using [slf4j](http://www.slf4j.org/) to do logging).
 
 API
 ---
