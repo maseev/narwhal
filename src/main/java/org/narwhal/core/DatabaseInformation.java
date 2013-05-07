@@ -30,7 +30,7 @@ public class DatabaseInformation {
     }
 
     /**
-     * Returns database driver name that used for loading driver name in the JVM.
+     * Returns database driver name which is used for loading JDBC driver.
      *
      * @return Database driver name
      * */
