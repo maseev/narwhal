@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 
 /**
- * The <code>Table</code> annotation marks particular
+ * The <code>Table</code> annotation is used to mark the particular
  * class which maps on the database table.
  *
  * @author Miron Aseev
