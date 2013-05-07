@@ -14,14 +14,13 @@ import java.sql.SQLException;
 @RunWith(JUnit4.class)
 public class ConnectionPoolTest {
 
-    private static final String driver   = "com.mysql.jdbc.Driver";
-    private static final String url      = "jdbc:mysql://localhost/bank";
-    private static final String username = "lrngsql";
-    private static final String password = "lrngsql";
-
 
     @Test
     public void setSizeTest() {
+        final String driver   = "com.mysql.jdbc.Driver";
+        final String url      = "jdbc:mysql://localhost/bank";
+        final String username = "lrngsql";
+        final String password = "lrngsql";
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         ConnectionPool pool;
         int expectedPoolSize = 10;
