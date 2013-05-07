@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 
 /**
- * The <code>Column</code> annotation marks particular
+ * The <code>Column</code> annotation is used to mark the particular
  * field of the class which maps on the column of the database table.
  *
  * @author Miron Aseev
@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 public @interface Column {
 
     /**
-     * Returns database column name.
+     * Returns the database column name.
      *
      * @return Database column name.
      * */
