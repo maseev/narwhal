@@ -33,7 +33,7 @@ public class ConnectionPool {
     /**
      * Initializes a new instance of the ConnectionPool class.
      * The instance is specified by DatabaseInformation instance that
-     * keeps all the information to connect to the database.
+     * keeps all the information to be able to make connection to the database.
      * Default pool size is 5.
      * Acquire increment is 5.
      *
@@ -48,7 +48,7 @@ public class ConnectionPool {
     /**
      * Initializes a new instance of the ConnectionPool class.
      * The instance is specified by DatabaseInformation instance that
-     * keeps all the information to connect to the database.
+     * keeps all the information to make connection to the database.
      * Instance is also specified by the size and acquireIncrement variable.
      *
      * @param databaseInformation instance of {@code DatabaseInformation} class that includes
@@ -78,7 +78,8 @@ public class ConnectionPool {
     /**
      * Returns DatabaseConnection object from the pool.
      * This method removes connection from the pool collection.
-     * You should return connection to the pool by invoking returnConnection() method.
+     * After working with DatabaseConnection object you should
+     * return connection to the pool by invoking returnConnection() method.
      *
      * @return DatabaseConnection object.
      * @throws SQLException If any database access problems happened.
@@ -106,7 +107,7 @@ public class ConnectionPool {
     /**
      * Returns connection to the pool.
      *
-     * @param connection object to be added to the pool.
+     * @param connection Database connection which is going to be added to the pool.
      * */
     public void returnConnection(DatabaseConnection connection) {
         connectionsLock.lock();
