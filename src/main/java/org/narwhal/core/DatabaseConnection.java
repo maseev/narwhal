@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * <p>
  * The <code>DatabaseConnection</code> represents connection to the relational database.
- * This class includes methods for retrieve particular information from the relational databases.
+ * This class includes methods for retrieving the particular information from the relational databases.
  * It automatically maps retrieved result set to the particular entity (java class).
  * DatabaseConnection class also manages all resources like database connection,
  * prepared statements, result sets etc.
@@ -25,8 +25,7 @@ import java.util.List;
  * </p>
  *
  * <p>
- *     For using this class properly, all mapped classes have to annotate all fields
- *     that map to the database columns.
+ *     In order to use this class properly, all the fields of the mapped classes have to be annotated.
  *
  *     Here's an example how to use the annotation:
  *
@@ -42,8 +41,8 @@ import java.util.List;
  *         }
  *     </code></p>
  *
- *     The methods of the <code>DatabaseConnection</code> class use annotations and annotated fields
- *     to retrieve necessary information from database and to invoke set methods through reflection api.
+ *     The methods of the <code>DatabaseConnection</code> class use the annotations and annotated fields
+ *     to retrieve necessary information from the database and to invoke set methods through the Java reflection API.
  * </p>
 
  * <p>Here are some examples how DatabaseConnection can be used:</p>
@@ -69,7 +68,6 @@ public class DatabaseConnection {
 
     /**
      * Initializes a new instance of the DatabaseConnection class and trying to connect to the database.
-     * Instance is specified by the value of DatabaseInformation class that keeps all the information needed to connect.
      *
      * @param databaseInformation instance of {@code DatabaseInformation} class that includes
      *                            all the information for making connection to the database.
@@ -80,7 +78,7 @@ public class DatabaseConnection {
     }
 
     /**
-     * Begins new transaction to perform.
+     * Starts a new transaction.
      *
      * @throws SQLException If any database access problems happened.
      * */
@@ -89,9 +87,9 @@ public class DatabaseConnection {
     }
 
     /**
-     * Makes all changes made since the previous commit/rollback permanent
-     * and releases any database locks currently held by this Connection object.
-     * This method should be used only when auto-commit mode has been disabled.
+     * Makes all changes which have been made since the previous commit/rollback permanent
+     * and releases any database locks which are currently held by this Connection object.
+     * This method should be used only when auto-commit mode is disabled.
      *
      * @throws SQLException If any database access problems happened.
      * */
@@ -101,9 +99,9 @@ public class DatabaseConnection {
     }
 
     /**
-     * Undoes all changes made in the current transaction and releases any database
-     * locks currently held by this Connection object.
-     * This method should be used only when auto-commit mode has been disabled.
+     * Undoes all changes which have been made in the current transaction and releases any database
+     * locks which are currently held by this Connection object.
+     * This method should be used only when auto-commit mode is disabled.
      *
      * @throws SQLException If any database access problems happened.
      * */
@@ -176,7 +174,7 @@ public class DatabaseConnection {
     }
 
     /**
-     * Builds and executes update SQL query. This method returns the number of rows that have been affected.
+     * Builds and executes UPDATE SQL query. This method returns the number of rows that have been affected.
      *
      * Here is an example of usage:
      * <p>
@@ -405,7 +403,7 @@ public class DatabaseConnection {
      * parameter that was placed like the second and subsequent argument after SQL query.
      *
      * Here's how it works:
-     * In the example below, there are two wildcard symbols and two wildcard parameters.
+     * In the example below, you could see the two wildcard symbols and two wildcard parameters.
      *
      * <code>
      *     createPreparedStatement("SELECT * FROM person WHERE id = ? AND name = ?", 1, "John");
@@ -455,7 +453,7 @@ public class DatabaseConnection {
     }
 
     /**
-     * Return instance of the MappedClassInformation class from the cache.
+     * Returns instance of the MappedClassInformation class from the cache.
      * If there's no corresponding instance of the MappedClassInformation class,
      * then a new one will be created and putted to the cache.
      *
@@ -483,7 +481,7 @@ public class DatabaseConnection {
     }
 
     /**
-     * Returns field's value of the particular object that was annotated {@literal Column}
+     * Returns field's value of the particular object that was annotated by {@literal Column}
      * annotation with primaryKey = true by invoking getter method.
      *
      * @param object Entity class which method is used to be invoked.
@@ -548,8 +546,8 @@ public class DatabaseConnection {
      * as a first argument and trying to build instance of the particular class.
      * Information about the class holds in the MappedClassInformation instance
      * that has been pointed as a second argument.
-     * This method invokes all set methods mapped class for setting fields
-     * information that has been retrieved from result set.
+     * This method invokes all set methods of the mapped class for setting fields
+     * information that has been retrieved from the result set.
      *
      * @param resultSet Result set that was retrieved from the database.
      * @param classInformation Instance of MappedClassInformation that holds all information about mapped class.
