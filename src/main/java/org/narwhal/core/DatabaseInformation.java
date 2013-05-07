@@ -13,11 +13,9 @@ public class DatabaseInformation {
     private String username;
     private String password;
 
-    
+
     /**
      * Initializes a new DatabaseInformation instance.
-     * Instance is specified by the number of the parameters
-     * that represent information for the database connection.
      * 
      * @param driver Database driver name.
      * @param url URL that describes a path to the particular database.
