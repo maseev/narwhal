@@ -62,8 +62,8 @@ import java.util.List;
  */
 public class DatabaseConnection {
 
-    private static Logger logger = LoggerFactory.getLogger(DatabaseConnection.class);
-    private static Cache cache = new Cache();
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseConnection.class);
+    private static final Cache cache = new Cache();
     private Connection connection;
 
 
