@@ -30,7 +30,7 @@ public class Cache {
     /**
      * Tests whether cache contains a particular key or not.
      *
-     * @param key Key whose presence in this map is to be tested
+     * @param key Key whose presence in this map is tested
      * @return True if cache contains the key. False otherwise.
      * */
     public boolean containsKey(Class key) {
@@ -43,12 +43,12 @@ public class Cache {
     }
 
     /**
-     * Associates the specified value with the specified key in the map If the map already
-     * contained the key in the map then the associated is replaced by new value.
+     * Maps the value with the key. If the map already has the key
+     * then the old value will be replaced by the new one.
      *
-     * @param mappedClass The value of Class that uses as a key in the map.
-     * @param classInformation The instance of MappedClassInformation that uses as value in the map.
-     * @return The value of MappedClassInformation that was associated with a particular key.
+     * @param mappedClass The value of the Class which is used as a key.
+     * @param classInformation The instance of the MappedClassInformation which is used as a value.
+     * @return The mapped value which is mapped with a particular key.
      * */
     public MappedClassInformation put(Class mappedClass, MappedClassInformation classInformation) {
         writeLock.lock();
