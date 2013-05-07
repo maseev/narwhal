@@ -30,7 +30,7 @@ public class DatabaseInformation {
     }
 
     /**
-     * Returns database driver name which is used for loading JDBC driver.
+     * Returns the database driver name which is used for loading JDBC driver.
      *
      * @return Database driver name
      * */
@@ -39,7 +39,7 @@ public class DatabaseInformation {
     }
 
     /**
-     * Sets new database driver name that used for loading driver name in the JVM.
+     * Sets a new database driver name which is used for loading JDBC driver.
      *
      * @param driver Database driver name
      * */
@@ -48,25 +48,25 @@ public class DatabaseInformation {
     }
 
     /**
-     * Returns database url that used for connecting to the particular database.
+     * Returns the database url which is used for connecting to the particular database.
      *
-     * @return URL that describes a path to the particular database.
+     * @return URL which describes a path to the particular database.
      * */
     public String getUrl() {
         return url;
     }
 
     /**
-     * Sets new database url that used for connecting to the particular database.
+     * Sets a new database url which is used for connecting to the particular database.
      *
-     * @param url URL that describes a path to the particular database.
+     * @param url URL which describes a path to the particular database.
      * */
     public void setUrl(String url) {
         this.url = url;
     }
 
     /**
-     * Returns string representation of database username.
+     * Returns a string representation of database username.
      *
      * @return String representation of database username.
      * */
@@ -75,7 +75,7 @@ public class DatabaseInformation {
     }
 
     /**
-     * Sets new username for database information class instance.
+     * Sets a new username for database information class instance.
      *
      * @param username String representation of database username.
      * */
@@ -93,7 +93,7 @@ public class DatabaseInformation {
     }
 
     /**
-     * Sets new password for database information class instance.
+     * Sets a new password for database information class instance.
      *
      * @param password String representation of database password.
      * */
