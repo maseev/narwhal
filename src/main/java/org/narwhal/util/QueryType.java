@@ -2,7 +2,7 @@ package org.narwhal.util;
 
 /**
  * The <code>QueryType</code> enum describes types
- * of query that use in createQueries method.
+ * of query which are used in the createQueries method.
  * */
 public enum QueryType {
     CREATE,
