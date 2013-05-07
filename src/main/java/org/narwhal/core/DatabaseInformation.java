@@ -13,15 +13,7 @@ public class DatabaseInformation {
     private String username;
     private String password;
 
-
-    /**
-     * Initializes a new DatabaseInformation instance.
-     * This constructor was created for the cases when using
-     * set and get methods is the more proper way to set object's fields.
-     * */
-    public DatabaseInformation() {
-    }
-
+    
     /**
      * Initializes a new DatabaseInformation instance.
      * Instance is specified by the number of the parameters
