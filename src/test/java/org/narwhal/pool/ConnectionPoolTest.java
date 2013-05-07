@@ -14,10 +14,10 @@ import java.sql.SQLException;
 @RunWith(JUnit4.class)
 public class ConnectionPoolTest {
 
-    private static String driver = "com.mysql.jdbc.Driver";
-    private static String url = "jdbc:mysql://localhost/bank";
-    private static String username = "lrngsql";
-    private static String password = "lrngsql";
+    private static final String driver   = "com.mysql.jdbc.Driver";
+    private static final String url      = "jdbc:mysql://localhost/bank";
+    private static final String username = "lrngsql";
+    private static final String password = "lrngsql";
 
 
     @Test
