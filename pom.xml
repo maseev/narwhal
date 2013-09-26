@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.narwhal</groupId>
-    <artifactId>Narwhal</artifactId>
+    <artifactId>narwhal</artifactId>
     <version>1.0</version>
 
     <properties>
