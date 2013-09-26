@@ -94,7 +94,7 @@ The following example illustrates using convenient methods to persist entity to 
 try {
 	connection.beginTransaction();
 	
-	connection.create(new Person(1, "John");
+	connection.persist(new Person(1, "John");
 	connection.update(person1);
 	connection.delete(person2);
 	
