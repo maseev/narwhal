@@ -1,6 +1,7 @@
 package org.narwhal.core;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -24,7 +25,7 @@ public class DatabaseConnectionTest {
     private static final Date   johnBirthday = new GregorianCalendar(1990, 6, 9).getTime();
     private static final Date   doeBirthday  = new GregorianCalendar(1993, 3, 24).getTime();
 
-
+    @Ignore
     @Test
     public void transactionMethodsTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -59,6 +60,7 @@ public class DatabaseConnectionTest {
         }
     }
 
+    @Ignore
     @Test
     public void createTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -83,6 +85,7 @@ public class DatabaseConnectionTest {
         }
     }
 
+    @Ignore
     @Test
     public void readTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -106,6 +109,7 @@ public class DatabaseConnectionTest {
         }
     }
 
+    @Ignore
     @Test
     public void updateTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -130,6 +134,7 @@ public class DatabaseConnectionTest {
         }
     }
 
+    @Ignore
     @Test
     public void deleteTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -154,6 +159,7 @@ public class DatabaseConnectionTest {
         }
     }
 
+    @Ignore
     @Test
     public void executeUpdateTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -178,6 +184,7 @@ public class DatabaseConnectionTest {
         }
     }
 
+    @Ignore
     @Test
     public void executeQueryTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -199,6 +206,7 @@ public class DatabaseConnectionTest {
         Assert.assertEquals(expectedName, person.getName());
     }
 
+    @Ignore
     @Test
     public void executeQueryForCollectionTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
