@@ -20,7 +20,7 @@ Features
 
 How to build
 ------------
-* Narwhal uses [Maven](http://www.slf4j.org/) as a build tool, so make sure that you've got one installed on your machine.
+* Narwhal uses [Maven](http://maven.apache.org/) as a build tool, so make sure that you've got one installed on your machine.
 * Type the following command in console in order to build the project - `` mvn package ```
 
 API
