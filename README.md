@@ -18,6 +18,11 @@ Features
 * Automated work with resources (e.g. closing prepared statements, result set, closing database connection when some error occurs);
 * Provides logging support that makes easy to log any situations that occur while working with database (Narwhal's using [slf4j](http://www.slf4j.org/) to do logging).
 
+How to build
+------------
+* Narwhal uses [Maven](http://maven.apache.org/) as a build tool, so make sure that you've got one installed on your machine.
+* Type the following command in console in order to build the project - `` mvn package ```
+
 API
 ---
 Here's an example of using annotation to mark fields of the mapped class.
