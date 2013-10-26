@@ -1,4 +1,4 @@
-package org.narwhal.pool;
+package org.narwhal.pool.mysql;
 
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -6,8 +6,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.narwhal.core.DatabaseInformation;
+import org.narwhal.pool.ConnectionPool;
+import org.narwhal.query.MysqlQueryCreator;
 
 import java.sql.SQLException;
+
 
 /**
  * @author Miron Aseev
@@ -28,7 +31,7 @@ public class ConnectionPoolTest {
         int result = 0;
 
         try {
-            pool = new ConnectionPool(databaseInformation, 1, 1);
+            pool = new ConnectionPool(databaseInformation, 1, 1, new MysqlQueryCreator());
 
             try {
                 pool.setSize(expectedPoolSize);

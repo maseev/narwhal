@@ -5,6 +5,7 @@ import org.narwhal.annotation.Table;
 
 import java.util.Date;
 
+
 /**
  * @author Miron Aseev
  */

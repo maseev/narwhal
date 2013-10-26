@@ -1,4 +1,4 @@
-package org.narwhal.core;
+package org.narwhal.core.mysql;
 
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -6,11 +6,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.narwhal.bean.Person;
+import org.narwhal.core.DatabaseConnection;
+import org.narwhal.core.DatabaseInformation;
+import org.narwhal.query.MysqlQueryCreator;
 
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+
 
 /**
  * @author Miron Aseev
@@ -34,7 +38,7 @@ public class DatabaseConnectionTest {
         int result = 0;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
 
             try {
                 connection.beginTransaction();
@@ -70,7 +74,7 @@ public class DatabaseConnectionTest {
         int result;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
             result = connection.persist(person);
         } finally {
             if (connection != null) {
@@ -93,7 +97,7 @@ public class DatabaseConnectionTest {
         Person person;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
             person = connection.read(Person.class, 1);
         } finally {
             if (connection != null) {
@@ -119,7 +123,7 @@ public class DatabaseConnectionTest {
         int result;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
             result = connection.update(person);
         } finally {
             if (connection != null) {
@@ -144,7 +148,7 @@ public class DatabaseConnectionTest {
         int result;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
             result = connection.delete(person);
         } finally {
             if (connection != null) {
@@ -169,7 +173,7 @@ public class DatabaseConnectionTest {
         int result;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
             result = connection.executeUpdate("UPDATE Person SET name = ? WHERE id = ?", "FunnyName", doeId);
         } finally {
             if (connection != null) {
@@ -194,7 +198,7 @@ public class DatabaseConnectionTest {
         int joeId = 1;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
             person = connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, joeId);
         } finally {
             if (connection != null) {
@@ -215,7 +219,7 @@ public class DatabaseConnectionTest {
         int expectedSize = 2;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
             persons = connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
         } finally {
             if (connection != null) {
@@ -233,7 +237,7 @@ public class DatabaseConnectionTest {
         DatabaseConnection connection = null;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
 
             try {
                 connection.beginTransaction();
