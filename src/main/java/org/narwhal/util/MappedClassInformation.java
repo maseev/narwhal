@@ -36,12 +36,12 @@ public class MappedClassInformation<T> {
      * */
     public MappedClassInformation(Class<T> mappedClass) throws NoSuchMethodException {
         Field[] fields = mappedClass.getDeclaredFields();
-        primaryKeyGetMethod = getPrimaryKeyMethod(mappedClass, fields);
-        primaryColumnName   = getPrimaryKeyColumnName(mappedClass, fields);
+        primaryKeyGetMethod = retrievePrimaryKeyMethod(mappedClass, fields);
+        primaryColumnName   = retrievePrimaryKeyColumnName(mappedClass, fields);
         constructor = mappedClass.getConstructor();
-        setMethods  = getSetMethods(mappedClass, fields);
-        getMethods  = getGetMethods(mappedClass, fields);
-        columns     = getColumnsName(fields);
+        setMethods  = retrieveSetters(mappedClass, fields);
+        getMethods  = retrieveGetters(mappedClass, fields);
+        columns     = retrieveColumnsName(fields);
         queries     = createQueries(mappedClass);
     }
 
@@ -105,7 +105,7 @@ public class MappedClassInformation<T> {
      * @param fields Fields of class that have been annotated by {@literal @}Column annotation.
      * @return Columns of the database table.
      * */
-    private String[] getColumnsName(Field[] fields) {
+    private String[] retrieveColumnsName(Field[] fields) {
         String[] columns = new String[fields.length];
 
         for (int i = 0; i < fields.length; ++i) {
@@ -128,7 +128,7 @@ public class MappedClassInformation<T> {
      * @throws IllegalArgumentException if field of the class wasn't annotated by the {@literal @}Column annotation
      *         with primaryKey = true.
      * */
-    private <T> String getPrimaryKeyColumnName(Class<T> mappedClass, Field[] fields) {
+    private <T> String retrievePrimaryKeyColumnName(Class<T> mappedClass, Field[] fields) {
         for (Field field : fields) {
             if (field.isAnnotationPresent(Column.class) &&
                 field.getAnnotation(Column.class).primaryKey()) {
@@ -209,7 +209,7 @@ public class MappedClassInformation<T> {
      * @return Set methods of the class.
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
-    private <T> Method[] getSetMethods(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
+    private <T> Method[] retrieveSetters(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
         Method[] methods = new Method[fields.length];
 
         for (int i = 0; i < fields.length; ++i) {
@@ -229,7 +229,7 @@ public class MappedClassInformation<T> {
      * @return Set methods of the class.
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
-    private <T> Method[] getGetMethods(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
+    private <T> Method[] retrieveGetters(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
         Method[] methods = new Method[fields.length];
 
         for (int i = 0; i < fields.length; ++i) {
@@ -249,7 +249,7 @@ public class MappedClassInformation<T> {
      * @return Getter method for the field that maps to the primary key.
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
-    private <T> Method getPrimaryKeyMethod(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
+    private <T> Method retrievePrimaryKeyMethod(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
         for (Field field : fields) {
             if (field.isAnnotationPresent(Column.class) &&
                 field.getAnnotation(Column.class).primaryKey()) {
