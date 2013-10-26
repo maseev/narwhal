@@ -35,8 +35,7 @@ public abstract class QueryCreator {
      * */
     public String makeSelectQuery(String tableName, String[] columns, String primaryColumnName) {
         StringBuilder builder = new StringBuilder("SELECT ");
-        builder.append('(');
-
+        
         for (int i = 0; i < columns.length; ++i) {
             if (i > 0) {
                 builder.append(',');
@@ -45,7 +44,6 @@ public abstract class QueryCreator {
             builder.append(columns[i]);
         }
 
-        builder.append(')');
         builder.append(" FROM ");
         builder.append(tableName);
         builder.append(" WHERE ");
