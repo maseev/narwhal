@@ -18,6 +18,7 @@ import java.sql.SQLException;
 @RunWith(JUnit4.class)
 public class ConnectionPoolTest {
 
+
     @Ignore
     @Test
     public void setSizeTest() {
