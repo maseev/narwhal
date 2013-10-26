@@ -302,7 +302,7 @@ public class MappedClassInformation<T> {
 
             builder.append('?');
         }
-        builder.append(")");
+        builder.append(')');
 
         return builder.toString();
     }
@@ -316,6 +316,17 @@ public class MappedClassInformation<T> {
     private String makeSelectQuery(String tableName) {
         StringBuilder builder = new StringBuilder("SELECT * FROM ");
         builder.append(tableName);
+        builder.append('(');
+
+        for (int i = 0; i < columns.length; ++i) {
+            if (i > 0) {
+                builder.append(',');
+            }
+
+            builder.append(columns[i]);
+        }
+        
+        builder.append(')');
         builder.append(" WHERE ");
         builder.append(primaryColumnName);
         builder.append(" = ?");
