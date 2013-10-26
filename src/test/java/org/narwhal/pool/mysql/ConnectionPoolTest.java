@@ -19,7 +19,6 @@ import java.sql.SQLException;
 public class ConnectionPoolTest {
 
 
-    @Ignore
     @Test
     public void setSizeTest() {
         final String driver   = "com.mysql.jdbc.Driver";

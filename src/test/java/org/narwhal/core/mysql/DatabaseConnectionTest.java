@@ -30,7 +30,6 @@ public class DatabaseConnectionTest {
     private static final Date   doeBirthday  = new GregorianCalendar(1993, 3, 24).getTime();
 
 
-    @Ignore
     @Test
     public void transactionMethodsTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -65,7 +64,6 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
     public void createTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -90,7 +88,6 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
     public void readTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -114,7 +111,6 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
     public void updateTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -139,7 +135,6 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
     public void deleteTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -164,7 +159,6 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
     public void executeUpdateTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -189,7 +183,6 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
     public void executeQueryTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -211,7 +204,6 @@ public class DatabaseConnectionTest {
         Assert.assertEquals(expectedName, person.getName());
     }
 
-    @Ignore
     @Test
     public void executeQueryForCollectionTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
