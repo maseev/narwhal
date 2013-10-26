@@ -2,6 +2,7 @@ package org.narwhal.util;
 
 import org.narwhal.annotation.Column;
 import org.narwhal.annotation.Table;
+import org.narwhal.query.QueryCreator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -34,7 +35,7 @@ public class MappedClassInformation<T> {
      * @param mappedClass A Class, which is used for retrieving information about constructors, set methods etc.
      * @throws NoSuchMethodException If there is no appropriate method to invoke
      * */
-    public MappedClassInformation(Class<T> mappedClass) throws NoSuchMethodException {
+    public MappedClassInformation(Class<T> mappedClass, QueryCreator queryCreator) throws NoSuchMethodException {
         Field[] fields = mappedClass.getDeclaredFields();
         primaryKeyGetMethod = retrievePrimaryKeyMethod(mappedClass, fields);
         primaryColumnName   = retrievePrimaryKeyColumnName(mappedClass, fields);
@@ -42,7 +43,7 @@ public class MappedClassInformation<T> {
         setMethods  = retrieveSetters(mappedClass, fields);
         getMethods  = retrieveGetters(mappedClass, fields);
         columns     = retrieveColumnsName(fields);
-        queries     = createQueries(mappedClass);
+        queries     = createQueries(mappedClass, queryCreator);
     }
 
     /**
@@ -272,107 +273,15 @@ public class MappedClassInformation<T> {
      * @param mappedClass A Class, which is used for retrieving information about constructors, set methods etc.
      * @return Map of QueryType and SQL query pairs.
      * */
-    private <T> Map<QueryType, String> createQueries(Class<T> mappedClass) {
+    private <T> Map<QueryType, String> createQueries(Class<T> mappedClass, QueryCreator creator) {
         String tableName = getTableName(mappedClass);
         Map<QueryType, String> queries = new HashMap<>();
 
-        queries.put(QueryType.CREATE, makeInsertQuery(tableName));
-        queries.put(QueryType.READ,   makeSelectQuery(tableName));
-        queries.put(QueryType.UPDATE, makeUpdateQuery(tableName));
-        queries.put(QueryType.DELETE, makeDeleteQuery(tableName));
+        queries.put(QueryType.CREATE, creator.makeInsertQuery(tableName, columns, primaryColumnName));
+        queries.put(QueryType.READ,   creator.makeSelectQuery(tableName, columns, primaryColumnName));
+        queries.put(QueryType.UPDATE, creator.makeUpdateQuery(tableName, columns, primaryColumnName));
+        queries.put(QueryType.DELETE, creator.makeDeleteQuery(tableName, primaryColumnName));
 
         return queries;
-    }
-
-    /**
-     * Makes prepared INSERT SQL statement by using the table name.
-     *
-     * @param tableName String representation of the table name that maps to the particular entity.
-     * @return String representation of the INSERT SQL statement.
-     * */
-    private String makeInsertQuery(String tableName) {
-        StringBuilder builder = new StringBuilder("INSERT INTO ");
-        builder.append(tableName);
-        builder.append(" VALUES (");
-
-        for (int i = 0; i < columns.length; ++i) {
-            if (i > 0) {
-                builder.append(',');
-            }
-
-            builder.append('?');
-        }
-        builder.append(')');
-
-        return builder.toString();
-    }
-
-    /**
-     * Makes prepared SELECT SQL statement by using the table name.
-     *
-     * @param tableName String representation of the table name that maps to the particular entity.
-     * @return String representation of the SELECT SQL statement.
-     * */
-    private String makeSelectQuery(String tableName) {
-        StringBuilder builder = new StringBuilder("SELECT * FROM ");
-        builder.append(tableName);
-        builder.append('(');
-
-        for (int i = 0; i < columns.length; ++i) {
-            if (i > 0) {
-                builder.append(',');
-            }
-
-            builder.append(columns[i]);
-        }
-        
-        builder.append(')');
-        builder.append(" WHERE ");
-        builder.append(primaryColumnName);
-        builder.append(" = ?");
-
-        return builder.toString();
-    }
-
-    /**
-     * Makes prepared DELETE SQL statement by using the table name.
-     *
-     * @param tableName String representation of the table name that maps to the particular entity.
-     * @return String representation of the DELETE SQL statement.
-     * */
-    private String makeDeleteQuery(String tableName) {
-        StringBuilder builder = new StringBuilder("DELETE FROM ");
-        builder.append(tableName);
-        builder.append(" WHERE ");
-        builder.append(primaryColumnName);
-        builder.append(" = ?");
-
-        return builder.toString();
-    }
-
-    /**
-     * Makes prepared UPDATE SQL statement by using the table name.
-     *
-     * @param tableName String representation of the table name that maps to the particular entity.
-     * @return String representation of the UPDATE SQL statement.
-     * */
-    private String makeUpdateQuery(String tableName) {
-        StringBuilder builder = new StringBuilder("UPDATE ");
-        builder.append(tableName);
-        builder.append(" SET ");
-
-        for (int i = 0; i < columns.length; ++i) {
-            if (i > 0) {
-                builder.append(',');
-            }
-
-            builder.append(columns[i]);
-            builder.append(" = ?");
-        }
-        builder.append(" WHERE ");
-        builder.append(primaryColumnName);
-        builder.append(" = ?");
-
-        return builder.toString();
     }
 }
