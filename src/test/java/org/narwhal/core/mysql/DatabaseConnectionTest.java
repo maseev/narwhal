@@ -1,7 +1,6 @@
 package org.narwhal.core.mysql;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -23,9 +22,9 @@ import java.util.List;
 public class DatabaseConnectionTest {
 
     private static final String driver       = "com.mysql.jdbc.Driver";
-    private static final String url          = "jdbc:mysql://localhost/bank";
-    private static final String username     = "lrngsql";
-    private static final String password     = "lrngsql";
+    private static final String url          = "jdbc:mysql://localhost/test";
+    private static final String username     = "test";
+    private static final String password     = "test";
     private static final Date   johnBirthday = new GregorianCalendar(1990, 6, 9).getTime();
     private static final Date   doeBirthday  = new GregorianCalendar(1993, 3, 24).getTime();
 
