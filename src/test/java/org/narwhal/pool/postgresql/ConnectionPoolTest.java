@@ -22,7 +22,7 @@ public class ConnectionPoolTest {
     public void setSizeTest() {
         final String driver   = "org.postgresql.Driver";
         final String url      = "jdbc:postgresql://localhost/test";
-        final String username = "postgresql";
+        final String username = "postgres";
         final String password = "admin";
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         ConnectionPool pool;

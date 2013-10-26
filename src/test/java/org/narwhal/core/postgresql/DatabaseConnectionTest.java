@@ -23,7 +23,7 @@ public class DatabaseConnectionTest {
 
     private static final String driver       = "org.postgresql.Driver";
     private static final String url          = "jdbc:postgresql://localhost/test";
-    private static final String username     = "postgresql";
+    private static final String username     = "postgres";
     private static final String password     = "admin";
     private static final Date   johnBirthday = new GregorianCalendar(1990, 6, 9).getTime();
     private static final Date   doeBirthday  = new GregorianCalendar(1993, 3, 24).getTime();
