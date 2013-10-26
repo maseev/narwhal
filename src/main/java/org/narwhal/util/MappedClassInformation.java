@@ -22,7 +22,7 @@ public class MappedClassInformation<T> {
     private Constructor<T> constructor;
     private Method[] setMethods;
     private Method[] getMethods;
-    private List<String> columns;
+    private String[] columns;
     private Method primaryKeyGetMethod;
     private Map<QueryType, String> queries;
     private String primaryColumnName;
@@ -107,11 +107,16 @@ public class MappedClassInformation<T> {
      * @param fields Fields of class that have been annotated by {@literal @}Column annotation.
      * @return Columns of the database table.
      * */
-    private List<String> getColumnsName(Field[] fields) {
-        List<String> columns = new ArrayList<>();
+    private String[] getColumnsName(Field[] fields) {
+        String[] columns = new String[fields.length];
 
-        for (Field field : fields) {
-            columns.add(field.getAnnotation(Column.class).value());
+        for (int i = 0; i < fields.length; ++i) {
+            if (fields[i].isAnnotationPresent(Column.class) &&
+                !fields[i].getAnnotation(Column.class).value().isEmpty()) {
+                columns[i] = fields[i].getAnnotation(Column.class).value();
+            } else {
+                columns[i] = fields[i].getName();
+            }
         }
 
         return columns;
