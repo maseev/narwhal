@@ -1,5 +1,6 @@
 package org.narwhal.core;
 
+import org.narwhal.query.QueryCreator;
 import org.narwhal.util.Cache;
 import org.narwhal.util.MappedClassInformation;
 import org.narwhal.util.QueryType;
@@ -65,6 +66,7 @@ public class DatabaseConnection {
     private static final Logger logger = LoggerFactory.getLogger(DatabaseConnection.class);
     private static final Cache cache = new Cache();
     private Connection connection;
+    private QueryCreator queryCreator;
 
 
     /**
@@ -74,8 +76,9 @@ public class DatabaseConnection {
      *                            all the information for making connection to the database.
      * @throws SQLException If any database access problems happened.
      * */
-    public DatabaseConnection(DatabaseInformation databaseInformation) throws SQLException {
+    public DatabaseConnection(DatabaseInformation databaseInformation, QueryCreator queryCreator) throws SQLException {
         connection = getConnection(databaseInformation);
+        this.queryCreator = queryCreator;
     }
 
     /**
@@ -383,7 +386,7 @@ public class DatabaseConnection {
     private Object[] getParameters(Object object) {
         List<Object> parameters = new ArrayList<>();
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
-        List<Method> getMethods = classInformation.getGetMethods();
+        Method[] getMethods = classInformation.getGetMethods();
 
         try {
             for (Method method : getMethods) {
@@ -471,7 +474,7 @@ public class DatabaseConnection {
         MappedClassInformation classInformation = null;
 
         try {
-            classInformation = new MappedClassInformation(mappedClass);
+            classInformation = new MappedClassInformation(mappedClass, queryCreator);
             cache.put(mappedClass, classInformation);
         } catch (NoSuchMethodException ex) {
             logger.error("Reflective operation exception has occurred", ex);
@@ -556,16 +559,16 @@ public class DatabaseConnection {
      * @throws SQLException If any database access problems happened.
      * */
      private <T> T createEntitySupporter(ResultSet resultSet, MappedClassInformation<T> classInformation) throws SQLException {
-        List<Method> setMethods = classInformation.getSetMethods();
-        List<String> columns = classInformation.getColumns();
+        Method[] setMethods = classInformation.getSetMethods();
+        String[] columns = classInformation.getColumns();
         T result = null;
 
         try {
             result = classInformation.getConstructor().newInstance();
 
-            for (int i = 0; i < columns.size(); ++i) {
-                Object data = resultSet.getObject(columns.get(i));
-                setMethods.get(i).invoke(result, data);
+            for (int i = 0; i < columns.length; ++i) {
+                Object data = resultSet.getObject(columns[i]);
+                setMethods[i].invoke(result, data);
             }
         } catch (ReflectiveOperationException ex) {
             logger.error("Reflective operation exception has occurred", ex);
