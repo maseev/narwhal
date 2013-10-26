@@ -25,13 +25,16 @@ How to build
 
 API
 ---
-Here's an example of using annotation to mark fields of the mapped class.
-Notice! All the mapped classes have to use annotation to map fields to the corresponding columns of the database table:
+Here are an examples of using annotations to mark fields of the mapped class.
+Here are couple of reasons why you would like to write the following class as it is.
+First - mapped class and its columns might have different names, so it quite obvious that you need to use
+annotations in order to match your fields of the class with table's columns.
+Second - you are probably in a very verbose mood :)
 
 ```java
 @Table("person")
 public class Person {
-	@Column(value = "person_id", primaryKey = true)
+	@Column(value = "personId", primaryKey = true)
 	private int id;
 	@Column("name")
 	private String name;
@@ -44,12 +47,48 @@ public class Person {
 	// getter and setter methods
 }
 ```
+
+The example above could be rewritten as:
+
+```java
+@Table
+public class Person {
+	@Column(primaryKey = true)
+	private int personId;
+	@Column
+	private String name;
+	@Column
+	private Date birthday;
+
+	public Person() {
+	}
+
+	// getter and setter methods
+}
+```
+
+Or you could write something like this:
+
+```java
+@Table
+public class Person {
+	@Column(primaryKey = true)
+	private int id;
+	private String name;
+	private Date birthday;
+
+	public Person() {
+	}
+
+	// getter and setter methods
+}
+```
 	
 The following example illustrates creating connection to the MySQL database:
 
 ```java
-String driver = "com.mysql.jdbc.Driver";
-String url = "jdbc:mysql://localhost/bank";
+String driver   = "com.mysql.jdbc.Driver";
+String url      = "jdbc:mysql://localhost/bank";
 String username = "lrngsql";
 String password = "lrngsql";
 DatabaseInformation information = new DatabaseInformation(driver, url, username, password);
