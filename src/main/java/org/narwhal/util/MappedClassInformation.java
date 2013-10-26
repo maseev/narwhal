@@ -156,7 +156,11 @@ public class MappedClassInformation<T> {
      * */
     private <T> String getTableName(Class<T> mappedClass) {
         if (mappedClass.isAnnotationPresent(Table.class)) {
-            return mappedClass.getAnnotation(Table.class).value();
+            if (mappedClass.getAnnotation(Table.class).value().isEmpty()) {
+                return mappedClass.getName();
+            } else {
+                return mappedClass.getAnnotation(Table.class).value();
+            }
         }
 
         throw new IllegalArgumentException("Class " + mappedClass.toString() +
