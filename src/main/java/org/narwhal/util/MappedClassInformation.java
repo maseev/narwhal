@@ -6,9 +6,7 @@ import org.narwhal.annotation.Table;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -88,7 +86,7 @@ public class MappedClassInformation<T> {
      *
      * @return Columns of the database table.
      * */
-    public List<String> getColumns() {
+    public String[] getColumns() {
         return columns;
     }
 
@@ -293,7 +291,7 @@ public class MappedClassInformation<T> {
         builder.append(tableName);
         builder.append(" VALUES (");
 
-        for (int i = 0; i < columns.size(); ++i) {
+        for (int i = 0; i < columns.length; ++i) {
             if (i > 0) {
                 builder.append(',');
             }
@@ -348,12 +346,12 @@ public class MappedClassInformation<T> {
         builder.append(tableName);
         builder.append(" SET ");
 
-        for (int i = 0; i < columns.size(); ++i) {
+        for (int i = 0; i < columns.length; ++i) {
             if (i > 0) {
                 builder.append(',');
             }
 
-            builder.append(columns.get(i));
+            builder.append(columns[i]);
             builder.append(" = ?");
         }
         builder.append(" WHERE ");
