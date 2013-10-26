@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
 /**
  * <p>
  * The <code>DatabaseConnection</code> represents connection to the relational database.

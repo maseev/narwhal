@@ -3,7 +3,6 @@ package org.narwhal.util;
 import org.narwhal.annotation.Column;
 import org.narwhal.annotation.Table;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -11,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * The <code>MappedClassInformation</code> class keeps all the information about particular class.
@@ -20,8 +20,8 @@ import java.util.Map;
 public class MappedClassInformation<T> {
 
     private Constructor<T> constructor;
-    private List<Method> setMethods;
-    private List<Method> getMethods;
+    private Method[] setMethods;
+    private Method[] getMethods;
     private List<String> columns;
     private Method primaryKeyGetMethod;
     private Map<QueryType, String> queries;
@@ -37,14 +37,14 @@ public class MappedClassInformation<T> {
      * @throws NoSuchMethodException If there is no appropriate method to invoke
      * */
     public MappedClassInformation(Class<T> mappedClass) throws NoSuchMethodException {
-        List<Field> annotatedFields = getAnnotatedFields(mappedClass, Column.class);
+        Field[] fields = mappedClass.getDeclaredFields();
+        primaryKeyGetMethod = getPrimaryKeyMethod(mappedClass, fields);
+        primaryColumnName   = getPrimaryKeyColumnName(mappedClass, fields);
         constructor = mappedClass.getConstructor();
-        setMethods = getSetMethods(mappedClass, annotatedFields);
-        getMethods = getGetMethods(mappedClass, annotatedFields);
-        primaryKeyGetMethod = getPrimaryKeyMethod(mappedClass, annotatedFields);
-        columns = getColumnsName(annotatedFields);
-        primaryColumnName = getPrimaryKeyColumnName(mappedClass, annotatedFields);
-        queries = createQueries(mappedClass);
+        setMethods  = getSetMethods(mappedClass, fields);
+        getMethods  = getGetMethods(mappedClass, fields);
+        columns     = getColumnsName(fields);
+        queries     = createQueries(mappedClass);
     }
 
     /**
@@ -52,7 +52,7 @@ public class MappedClassInformation<T> {
      *
      * @return List of set methods.
      * */
-    public List<Method> getSetMethods() {
+    public Method[] getSetMethods() {
         return setMethods;
     }
 
@@ -61,7 +61,7 @@ public class MappedClassInformation<T> {
      *
      * @return List of get methods.
      * */
-    public List<Method> getGetMethods() {
+    public Method[] getGetMethods() {
         return getMethods;
     }
 
@@ -104,13 +104,13 @@ public class MappedClassInformation<T> {
     /**
      * Retrieves columns name of the database table from the annotated fields.
      *
-     * @param annotatedFields Fields of class that have been annotated by {@literal @}Column annotation.
+     * @param fields Fields of class that have been annotated by {@literal @}Column annotation.
      * @return Columns of the database table.
      * */
-    private List<String> getColumnsName(List<Field> annotatedFields) {
+    private List<String> getColumnsName(Field[] fields) {
         List<String> columns = new ArrayList<>();
 
-        for (Field field : annotatedFields) {
+        for (Field field : fields) {
             columns.add(field.getAnnotation(Column.class).value());
         }
 
@@ -121,14 +121,21 @@ public class MappedClassInformation<T> {
      * Retrieves primary key name of the database table from the annotated fields.
      *
      * @param mappedClass A class, which is used for creating appropriate exception message.
-     * @param annotatedFields Fields of class that have been annotated by {@literal @}Column annotation.
+     * @param fields Fields of class that have been annotated by {@literal @}Column annotation.
      * @throws IllegalArgumentException if field of the class wasn't annotated by the {@literal @}Column annotation
      *         with primaryKey = true.
      * */
-    private <T> String getPrimaryKeyColumnName(Class<T> mappedClass, List<Field> annotatedFields) {
-        for (Field field : annotatedFields) {
-            if (field.getAnnotation(Column.class).primaryKey()) {
-                return field.getAnnotation(Column.class).value();
+    private <T> String getPrimaryKeyColumnName(Class<T> mappedClass, Field[] fields) {
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(Column.class) &&
+                field.getAnnotation(Column.class).primaryKey()) {
+                String columnName = field.getAnnotation(Column.class).value();
+
+                if (columnName.isEmpty()) {
+                    return field.getName();
+                } else {
+                    return columnName;
+                }
             }
         }
 
@@ -154,34 +161,13 @@ public class MappedClassInformation<T> {
     }
 
     /**
-     * Retrieves all fields of the class that have been annotated by a particular annotation.
-     *
-     * @param mappedClass A Class, which is used for retrieving information about constructors, set methods etc.
-     * @param annotation Annotation which is used as a condition to filter annotated fields of the class.
-     * @return List of fields that have been annotated by a particular annotation.
-     * */
-    private <T, V extends Annotation> List<Field> getAnnotatedFields(Class<T> mappedClass, Class<V> annotation) {
-        Field[] fields = mappedClass.getDeclaredFields();
-        List<Field> annotatedFields = new ArrayList<>();
-
-        for (Field field : fields) {
-            if (field.isAnnotationPresent(annotation)) {
-                annotatedFields.add(field);
-            }
-        }
-
-        return annotatedFields;
-    }
-
-    /**
      * Constructs string representation method by using field name and a prefix (get, set).
      *
-     * @param fieldName String representation of the class field.
      * @param prefix Prefix that uses to persist whether getter or setter.
      * @return String representation of the class method.
      * */
-    private String getMethodName(String fieldName, String prefix) {
-        char[] fieldNameArray = fieldName.toCharArray();
+    private String getMethodName(Field field, String prefix) {
+        char[] fieldNameArray = field.getName().toCharArray();
         fieldNameArray[0] = Character.toUpperCase(fieldNameArray[0]);
 
         return prefix + new String(fieldNameArray);
@@ -190,21 +176,25 @@ public class MappedClassInformation<T> {
     /**
      * Creates and returns name of the set method from string representation of the field.
      *
-     * @param fieldName String representation of class field.
      * @return String representation of the set method.
      * */
-    private String getSetMethodName(String fieldName) {
-        return getMethodName(fieldName, "set");
+    private String getSetMethodName(Field field) {
+        return getMethodName(field, "set");
     }
 
     /**
      * Creates and returns name of the get method from string representation of the field.
      *
-     * @param fieldName String representation of class field.
      * @return String representation of the set method.
      * */
-    private String getGetMethodName(String fieldName) {
-        return getMethodName(fieldName, "get");
+    private String getGetMethodName(Field field) {
+        Class type = field.getType();
+
+        if (type.equals(boolean.class) || type.equals(Boolean.class)) {
+            return getMethodName(field, "is");
+        } else {
+            return getMethodName(field, "get");
+        }
     }
 
     /**
@@ -216,12 +206,12 @@ public class MappedClassInformation<T> {
      * @return Set methods of the class.
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
-    private <T> List<Method> getSetMethods(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
-        List<Method> methods = new ArrayList<>();
+    private <T> Method[] getSetMethods(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
+        Method[] methods = new Method[fields.length];
 
-        for (Field field : fields) {
-            String methodName = getSetMethodName(field.getName());
-            methods.add(mappedClass.getMethod(methodName, field.getType()));
+        for (int i = 0; i < fields.length; ++i) {
+            String methodName = getSetMethodName(fields[i]);
+            methods[i] = mappedClass.getMethod(methodName, fields[i].getType());
         }
 
         return methods;
@@ -236,12 +226,12 @@ public class MappedClassInformation<T> {
      * @return Set methods of the class.
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
-    private <T> List<Method> getGetMethods(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
-        List<Method> methods = new ArrayList<>();
+    private <T> Method[] getGetMethods(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
+        Method[] methods = new Method[fields.length];
 
-        for (Field field : fields) {
-            String methodName = getGetMethodName(field.getName());
-            methods.add(mappedClass.getMethod(methodName));
+        for (int i = 0; i < fields.length; ++i) {
+            String methodName = getGetMethodName(fields[i]);
+            methods[i] = mappedClass.getMethod(methodName);
         }
 
         return methods;
@@ -256,10 +246,11 @@ public class MappedClassInformation<T> {
      * @return Getter method for the field that maps to the primary key.
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
-    private <T> Method getPrimaryKeyMethod(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
+    private <T> Method getPrimaryKeyMethod(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
         for (Field field : fields) {
-            if (field.getAnnotation(Column.class).primaryKey()) {
-                String methodName = getGetMethodName(field.getName());
+            if (field.isAnnotationPresent(Column.class) &&
+                field.getAnnotation(Column.class).primaryKey()) {
+                String methodName = getGetMethodName(field);
                 return mappedClass.getMethod(methodName);
             }
         }
