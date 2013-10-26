@@ -9,14 +9,14 @@ The major aim is to create useful library that helps to retrieve particular info
 
 Features
 --------
-* Provides convenient methods for manipulating entity (persist, read, update, delete).
-* Basic transaction management supports.
+* Provides convenient methods for manipulating entities (persist, read, update, delete).
+* Supports basic transaction management.
 * Supports connection pool;
-* Provides easy way to map class fields to the database columns through annotation;
-* Automatically creating instance of the mapped class;
-* Includes succinct number of convenient methods that provide the easy way to use prepared statements to query database;
-* Automated work with resources (e.g. closing prepared statements, result set, closing database connection when some error occurs);
-* Provides logging support that makes easy to log any situations that occur while working with database (Narwhal's using [slf4j](http://www.slf4j.org/) to do logging).
+* Provides easy way to map class's fields to the database columns through annotation;
+* Automatically creates instances of the mapped classes;
+* Includes a small number of convenient methods that provide easy way to use prepared statements to query database;
+* Does all the boring stuff for you (e.g. closes prepared statements, result set, closes database connections when some error occurs);
+* Provides logging support that makes easy to log any situations that occur while working with the database (Narwhal's using [slf4j](http://www.slf4j.org/) to do logging).
 
 How to build
 ------------
@@ -27,18 +27,18 @@ API
 ---
 Here are an examples of using annotations to mark fields of the mapped class.
 Here are couple of reasons why you would like to write the following class as it is.
-First - mapped class and its columns might have different names, so it quite obvious that you need to use
+First - fields of the mapped class and columns in the database table might have different names, so it quite obvious that you need to use
 annotations in order to match your fields of the class with table's columns.
 Second - you are probably in a very verbose mood :)
 
 ```java
-@Table("person")
+@Table("PERSON")
 public class Person {
-	@Column(value = "personId", primaryKey = true)
+	@Column(value = "PERSONID", primaryKey = true)
 	private int id;
-	@Column("name")
+	@Column("NAME")
 	private String name;
-	@Column("birthday")
+	@Column("BIRTHDAY")
 	private Date birthday;
 
 	public Person() {
@@ -67,7 +67,7 @@ public class Person {
 }
 ```
 
-Or you could write something like this:
+Or even like this:
 
 ```java
 @Table
@@ -95,11 +95,11 @@ DatabaseInformation information = new DatabaseInformation(driver, url, username,
 DatabaseConnection  connection  = new DatabaseConnection(information);
 ```
 	
-You can also use connection pool for creating necessary number of database connection:
+You can also use connection pool in order to create necessary number of database connections:
 	
 ```java
 DatabaseInformation information = new DatabaseInformation(driver, url, username, password);
-ConnectionPool connectionPool  = new ConnectionPool(information);
+ConnectionPool connectionPool   = new ConnectionPool(information);
 
 DatabaseConnection connection = connectionPool.getConnection();
 	
@@ -155,24 +155,3 @@ Library dependencies
 --------------------
 
 * Narwhal depends on [slf4j](http://www.slf4j.org/) to do logging.
-
-License
--------
-Narwhal source code is distributed under the MIT license.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to
-deal in the Software without restriction, including without limitation the
-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
-BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE 
-OR OTHER DEALINGS IN THE SOFTWARE.
