@@ -22,5 +22,5 @@ public @interface Table {
      *
      * @return Table name.
      * */
-    String value();
+    String value() default "";
 }

@@ -2,12 +2,14 @@ package org.narwhal.pool;
 
 import org.narwhal.core.DatabaseConnection;
 import org.narwhal.core.DatabaseInformation;
+import org.narwhal.query.QueryCreator;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 
 /**
  * The <code>ConnectionPool</code> class implements
@@ -28,6 +30,7 @@ public class ConnectionPool {
     private Lock connectionsLock;
     private Lock variableLock;
     private List<DatabaseConnection> connections;
+    private QueryCreator queryCreator;
 
 
     /**
@@ -41,8 +44,8 @@ public class ConnectionPool {
      *                            all the information for making connection to the database.
      * @throws SQLException If any database access problems happened.
      * */
-    public ConnectionPool(DatabaseInformation databaseInformation) throws SQLException {
-        this(databaseInformation, DEFAULT_POOL_SIZE, DEFAULT_ACQUIRE_INCREMENT);
+    public ConnectionPool(DatabaseInformation databaseInformation, QueryCreator queryCreator) throws SQLException {
+        this(databaseInformation, DEFAULT_POOL_SIZE, DEFAULT_ACQUIRE_INCREMENT, queryCreator);
     }
 
     /**
@@ -57,7 +60,8 @@ public class ConnectionPool {
      * @param acquireIncrement the acquire increment of the pool.
      * @throws SQLException If any database access problems happened.
      * */
-    public ConnectionPool(DatabaseInformation databaseInformation, int size, int acquireIncrement) throws SQLException {
+    public ConnectionPool(DatabaseInformation databaseInformation, int size,
+                          int acquireIncrement, QueryCreator queryCreator) throws SQLException {
         if (size < 1) {
             throw new IllegalArgumentException("Argument value must be equal or greater than 1: " + size);
         }
@@ -69,10 +73,11 @@ public class ConnectionPool {
         this.databaseInformation = databaseInformation;
         this.size = size;
         this.acquireIncrement = acquireIncrement;
+        this.queryCreator = queryCreator;
 
         connectionsLock = new ReentrantLock();
         variableLock = new ReentrantLock();
-        connections = createDatabaseConnections(size);
+        connections = createDatabaseConnections(size, queryCreator);
     }
 
     /**
@@ -88,7 +93,7 @@ public class ConnectionPool {
         connectionsLock.lock();
         try {
             if (connections.isEmpty()) {
-                connections.addAll(createDatabaseConnections(getAcquireIncrement()));
+                connections.addAll(createDatabaseConnections(getAcquireIncrement(), queryCreator));
 
                 variableLock.lock();
                 try {
@@ -175,7 +180,7 @@ public class ConnectionPool {
                 int numberOfConnections = Math.abs(newSize - size);
 
                 if (newSize > size) {
-                    connections.addAll(createDatabaseConnections(numberOfConnections));
+                    connections.addAll(createDatabaseConnections(numberOfConnections, queryCreator));
                 } else {
                     while (numberOfConnections > 0 && !connections.isEmpty()) {
                         connections.remove(connections.size() - 1).close();
@@ -231,11 +236,11 @@ public class ConnectionPool {
      * @return List of the database connections.
      * @throws SQLException If any database access problems happened.
      * */
-    private List<DatabaseConnection> createDatabaseConnections(int requiredSize) throws SQLException {
+    private List<DatabaseConnection> createDatabaseConnections(int requiredSize, QueryCreator queryCreator) throws SQLException {
         List<DatabaseConnection> conn = new ArrayList<>(requiredSize);
 
         for (int i = 0; i < requiredSize; ++i) {
-            conn.add(new DatabaseConnection(databaseInformation));
+            conn.add(new DatabaseConnection(databaseInformation, queryCreator));
         }
 
         return conn;

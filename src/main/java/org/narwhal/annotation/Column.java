@@ -21,7 +21,7 @@ public @interface Column {
      *
      * @return Database column name.
      * */
-    String value();
+    String value() default "";
 
     /**
      * Checks whether a class field is a primary key or not.

@@ -1,5 +1,6 @@
 package org.narwhal.core;
 
+
 /**
  * The <code>DatabaseInformation</code> class is a simple POJO class
  * which contains the information that is used to make connection to the databases.
