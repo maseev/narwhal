@@ -29,7 +29,7 @@ public class DatabaseConnectionTest {
     private static final Date   johnBirthday = new GregorianCalendar(1990, 6, 9).getTime();
     private static final Date   doeBirthday  = new GregorianCalendar(1993, 3, 24).getTime();
 
-    
+
     @Ignore
     @Test
     public void transactionMethodsTest() throws SQLException {
