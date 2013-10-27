@@ -9,14 +9,12 @@ import java.sql.Date;
 /**
  * @author Miron Aseev
  */
-@Table("PERSON")
+@Table
 public class Person {
 
-    @Column(value = "ID", primaryKey = true)
+    @Column(primaryKey = true)
     private Integer id;
-    @Column("NAME")
     private String name;
-    @Column("BIRTHDAY")
     private Date birthday;
 
 
