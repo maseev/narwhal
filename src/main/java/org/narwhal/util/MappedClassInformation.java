@@ -158,7 +158,14 @@ public class MappedClassInformation<T> {
     private <T> String getTableName(Class<T> mappedClass) {
         if (mappedClass.isAnnotationPresent(Table.class)) {
             if (mappedClass.getAnnotation(Table.class).value().isEmpty()) {
-                return mappedClass.getName();
+                String className = mappedClass.getName();
+                int index = className.lastIndexOf('.') + 1;
+
+                if (index < className.length()) {
+                    return className.substring(index);
+                } else {
+                    return className;
+                }
             } else {
                 return mappedClass.getAnnotation(Table.class).value();
             }
