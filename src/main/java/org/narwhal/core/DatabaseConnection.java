@@ -77,6 +77,10 @@ public class DatabaseConnection {
         this.queryCreator = queryCreator;
     }
 
+    public static void clearCache() {
+        cache.clean();
+    }
+
     /**
      * Starts a new transaction.
      *
@@ -451,10 +455,13 @@ public class DatabaseConnection {
     @SuppressWarnings("unchecked")
     private MappedClassInformation getMappedClassInformation(Class mappedClass) throws NoSuchMethodException{
         if (cache.containsKey(mappedClass)) {
-           return cache.get(mappedClass);
+            return cache.get(mappedClass);
         }
 
-        return cache.put(mappedClass, new MappedClassInformation(mappedClass, queryCreator));
+        MappedClassInformation classInformation = new MappedClassInformation(mappedClass, queryCreator);
+        cache.put(mappedClass, classInformation);
+
+        return classInformation;
     }
 
     /**

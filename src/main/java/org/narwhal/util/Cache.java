@@ -54,7 +54,9 @@ public class Cache {
     public MappedClassInformation put(Class mappedClass, MappedClassInformation classInformation) {
         writeLock.lock();
         try {
-            return entityCache.put(mappedClass, classInformation);
+            entityCache.put(mappedClass, classInformation);
+
+            return classInformation;
         } finally {
             writeLock.unlock();
         }
@@ -70,6 +72,15 @@ public class Cache {
         readLock.lock();
         try {
             return entityCache.get(key);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    public void clean() {
+        readLock.lock();
+        try {
+            entityCache.clear();
         } finally {
             readLock.unlock();
         }
