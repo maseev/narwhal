@@ -1,5 +1,6 @@
 package org.narwhal.core;
 
+import org.narwhal.query.PostgreSQLQueryCreator;
 import org.narwhal.query.QueryCreator;
 import org.narwhal.util.Cache;
 import org.narwhal.util.MappedClassInformation;
@@ -9,9 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -121,13 +120,14 @@ public class DatabaseConnection {
      * @throws SQLException If any database access problems happened.
      * */
     public int persist(Object object) throws SQLException {
-        List<Object> parameters = new ArrayList<>();
-        parameters.addAll(Arrays.asList(getParameters(object)));
-
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.CREATE);
 
-        return executeUpdate(query, parameters.toArray());
+        if (queryCreator.getClass() == PostgreSQLQueryCreator.class) {
+            return executeUpdate(query, getParametersWithoutPrimaryKey(object));
+        } else {
+            return executeUpdate(query, getParameters(object));
+        }
     }
 
     /**
@@ -384,20 +384,35 @@ public class DatabaseConnection {
      * */
     @SuppressWarnings("unchecked")
     private Object[] getParameters(Object object) {
-        List<Object> parameters = new ArrayList<>();
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         Method[] getMethods = classInformation.getGetMethods();
 
+        return retrieveParameters(object, getMethods);
+    }
+
+    private Object[] getParametersWithoutPrimaryKey(Object object) {
+        MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
+        Method[] getMethods = classInformation.getGetMethods();
+        Method primaryKeyGetter = classInformation.getPrimaryKeyGetMethod();
+        Set<Method> filteredGetters = new LinkedHashSet<>(Arrays.asList(getMethods));
+        filteredGetters.remove(primaryKeyGetter);
+
+        return retrieveParameters(object, filteredGetters.toArray(new Method[filteredGetters.size()]));
+    }
+
+    private Object[] retrieveParameters(Object object, Method[] getters) {
+        Object[] parameters = new Object[getters.length];
+
         try {
-            for (Method method : getMethods) {
-                parameters.add(method.invoke(object));
+            for (int i = 0; i < getters.length; ++i) {
+                parameters[i] = getters[i].invoke(object);
             }
         } catch (ReflectiveOperationException ex) {
             logger.error("Reflective operation exception has occurred", ex);
             System.exit(-1);
         }
 
-        return parameters.toArray();
+        return parameters;
     }
 
     /**
