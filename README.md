@@ -6,6 +6,7 @@ JDBC wrapper library
 
 Narwhal is a cross-platform JDBC wrapper library which provides a convenient way to access to the relational databases.
 The major aim was to create useful library that helps retrieve data from the relational databases.
+Narwhal was successfully tested with PostgreSQL 9.3.0-1 and MySQL 5.6.14.
 
 Features
 --------
