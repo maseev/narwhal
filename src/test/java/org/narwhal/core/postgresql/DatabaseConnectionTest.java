@@ -36,6 +36,8 @@ public class DatabaseConnectionTest {
         int expectedRowAffected = 3;
         int result = 0;
 
+        DatabaseConnection.clearCache();
+
         try {
             connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
 
@@ -71,6 +73,8 @@ public class DatabaseConnectionTest {
         int expectedRowAffected = 1;
         int result;
 
+        DatabaseConnection.clearCache();
+
         try {
             connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             result = connection.persist(person);
@@ -92,6 +96,8 @@ public class DatabaseConnectionTest {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         Person person;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
@@ -118,6 +124,8 @@ public class DatabaseConnectionTest {
         int expectedRowAffected = 1;
         int result;
 
+        DatabaseConnection.clearCache();
+
         try {
             connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             result = connection.update(person);
@@ -141,6 +149,8 @@ public class DatabaseConnectionTest {
         Person person = new Person(1, "John", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
         int result;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
@@ -166,6 +176,8 @@ public class DatabaseConnectionTest {
         int expectedRowAffected = 1;
         int result;
 
+        DatabaseConnection.clearCache();
+
         try {
             connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             result = connection.executeUpdate("UPDATE Person SET name = ? WHERE id = ?", "FunnyName", doeId);
@@ -190,6 +202,8 @@ public class DatabaseConnectionTest {
         Person person;
         int joeId = 1;
 
+        DatabaseConnection.clearCache();
+
         try {
             connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             person = connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, joeId);
@@ -209,6 +223,8 @@ public class DatabaseConnectionTest {
         DatabaseConnection connection = null;
         List<Person> persons;
         int expectedSize = 2;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());

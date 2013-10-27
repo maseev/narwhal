@@ -4,11 +4,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.narwhal.core.DatabaseConnection;
 import org.narwhal.core.DatabaseInformation;
 import org.narwhal.pool.ConnectionPool;
 import org.narwhal.query.PostgreSQLQueryCreator;
-
-import java.sql.SQLException;
 
 
 /**
@@ -28,6 +27,8 @@ public class ConnectionPoolTest {
         ConnectionPool pool;
         int expectedPoolSize = 10;
         int result = 0;
+
+        DatabaseConnection.clearCache();
 
         try {
             pool = new ConnectionPool(databaseInformation, 1, 1, new PostgreSQLQueryCreator());

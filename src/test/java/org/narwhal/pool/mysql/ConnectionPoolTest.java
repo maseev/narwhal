@@ -4,11 +4,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.narwhal.core.DatabaseConnection;
 import org.narwhal.core.DatabaseInformation;
 import org.narwhal.pool.ConnectionPool;
 import org.narwhal.query.MysqlQueryCreator;
-
-import java.sql.SQLException;
 
 
 /**
@@ -17,7 +16,7 @@ import java.sql.SQLException;
 @RunWith(JUnit4.class)
 public class ConnectionPoolTest {
 
-    
+
     @Test
     public void setSizeTest() {
         final String driver   = "com.mysql.jdbc.Driver";
@@ -28,6 +27,8 @@ public class ConnectionPoolTest {
         ConnectionPool pool;
         int expectedPoolSize = 10;
         int result = 0;
+
+        DatabaseConnection.clearCache();
 
         try {
             pool = new ConnectionPool(databaseInformation, 1, 1, new MysqlQueryCreator());

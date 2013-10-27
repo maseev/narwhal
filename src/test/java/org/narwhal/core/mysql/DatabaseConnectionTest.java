@@ -28,13 +28,15 @@ public class DatabaseConnectionTest {
     private static final Date   johnBirthday = new Date(new GregorianCalendar(1990, 6, 9).getTime().getTime());
     private static final Date   doeBirthday  = new Date(new GregorianCalendar(1993, 3, 24).getTime().getTime());
 
-    
+
     @Test
     public void transactionMethodsTest() throws SQLException, ClassNotFoundException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         int expectedRowAffected = 3;
         int result = 0;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
@@ -62,7 +64,7 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-    
+
     @Test
     public void createTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -70,6 +72,8 @@ public class DatabaseConnectionTest {
         Person person = new Person(null, "TestPerson", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
         int result;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
@@ -86,12 +90,14 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-    
+
     @Test
     public void readTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         Person person;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
@@ -109,7 +115,7 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-    
+
     @Test
     public void updateTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -117,6 +123,8 @@ public class DatabaseConnectionTest {
         Person person = new Person(1, "John Doe", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
         int result;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
@@ -133,7 +141,7 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-    
+
     @Test
     public void deleteTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -141,6 +149,8 @@ public class DatabaseConnectionTest {
         Person person = new Person(1, "John", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
         int result;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
@@ -157,7 +167,7 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-    
+
     @Test
     public void executeUpdateTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -165,6 +175,8 @@ public class DatabaseConnectionTest {
         int doeId = 2;
         int expectedRowAffected = 1;
         int result;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
@@ -181,7 +193,7 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-    
+
     @Test
     public void executeQueryTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -189,6 +201,8 @@ public class DatabaseConnectionTest {
         String expectedName = "John";
         Person person;
         int joeId = 1;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
@@ -202,13 +216,15 @@ public class DatabaseConnectionTest {
         Assert.assertNotNull(person);
         Assert.assertEquals(expectedName, person.getName());
     }
-    
+
     @Test
     public void executeQueryForCollectionTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         List<Person> persons;
         int expectedSize = 2;
+
+        DatabaseConnection.clearCache();
 
         try {
             connection = new DatabaseConnection(databaseInformation, new MysqlQueryCreator());
