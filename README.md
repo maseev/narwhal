@@ -4,19 +4,18 @@ Narwhal
 JDBC wrapper library
 -----------------------------
 
-Narwhal is a cross-platform JDBC wrapper library that provides a convenient way to access to the relational databases.
-The major aim is to create useful library that helps to retrieve particular information from the relational databases.
+Narwhal is a cross-platform JDBC wrapper library which provides a convenient way to access to the relational databases.
+The major aim was to create useful library that helps retrieve data from the relational databases.
 
 Features
 --------
 * Provides convenient methods for manipulating entities (persist, read, update, delete).
 * Supports basic transaction management.
 * Supports connection pool;
-* Provides easy way to map class's fields to the database columns through annotation;
+* Provides an easy way to map class's fields to the database columns through annotations;
 * Automatically creates instances of the mapped classes;
 * Includes a small number of convenient methods that provide easy way to use prepared statements to query database;
-* Does all the boring stuff for you (e.g. closes prepared statements, result set, closes database connections when some error occurs);
-* Provides logging support that makes easy to log any situations that occur while working with the database (Narwhal's using [slf4j](http://www.slf4j.org/) to do logging).
+* Does all the boring stuff for you (e.g. closes prepared statements and result sets, closes database connections when some error occurs);
 
 How to build
 ------------
@@ -25,11 +24,13 @@ How to build
 
 API
 ---
-Here are an examples of using annotations to mark fields of the mapped class.
+Here are the examples of using annotations to mark fields of the mapped class.
 Here are couple of reasons why you would like to write the following class as it is.
 First - fields of the mapped class and columns in the database table might have different names, so it quite obvious that you need to use
 annotations in order to match your fields of the class with table's columns.
-Second - you are probably in a very verbose mood :)
+Second - you are probably in a very verbose mood :).
+Notice, that you have to provide default constructor as well as getters and setters methods for the entity class.
+Narwhal uses them in order to create instances of the specific class and populates them with data.
 
 ```java
 @Table("PERSON")
@@ -54,25 +55,6 @@ The example above could be rewritten as:
 @Table
 public class Person {
 	@Column(primaryKey = true)
-	private int personId;
-	@Column
-	private String name;
-	@Column
-	private Date birthday;
-
-	public Person() {
-	}
-
-	// getter and setter methods
-}
-```
-
-Or even like this:
-
-```java
-@Table
-public class Person {
-	@Column(primaryKey = true)
 	private int id;
 	private String name;
 	private Date birthday;
@@ -88,9 +70,9 @@ The following example illustrates creating connection to the MySQL database:
 
 ```java
 String driver   = "com.mysql.jdbc.Driver";
-String url      = "jdbc:mysql://localhost/bank";
-String username = "lrngsql";
-String password = "lrngsql";
+String url      = "jdbc:mysql://localhost/test";
+String username = "test";
+String password = "test";
 DatabaseInformation information = new DatabaseInformation(driver, url, username, password);
 DatabaseConnection  connection  = new DatabaseConnection(information);
 ```
@@ -107,7 +89,7 @@ DatabaseConnection connection = connectionPool.getConnection();
 
 connectionPool.returnConnection(connection);
 
-// after all
+// in the end
 	
 connectionPool.close();
 ```
@@ -124,15 +106,15 @@ Performing query to retrieve a list of entities which satisfies the query:
 List<Person> persons = connection.executeQueryForCollection("SELECT * FROM person", Person.class);
 ```	
 		
-Here is the example of using insert, update and delete queries:
+Here is an example of using insert, update and delete queries:
 
 ```java
-connection.executeUpdate("INSERT INTO person (id, name, birthday) VALUES (?, ?)", null, "John", new Date());
+connection.executeUpdate("INSERT INTO person (id, name, birthday) VALUES (?, ?, ?)", null, "John", new Date());
 connection.executeUpdate("UPDATE person SET id = 1 WHERE name = ?", "John");
 connection.executeUpdate("DELETE FROM person WHERE id > ?", 0);
 ```
 
-The following example illustrates using convenient methods to persist entity to the database as well as basic transaction management:
+The following example illustrates process of using convenient methods such as ``` persist ```, ``` update ``` and ``` delete ``` as well as basic transaction management:
 
 ```java
 try {
@@ -150,8 +132,3 @@ try {
 	connection.rollback();
 }
 ```
-
-Library dependencies
---------------------
-
-* Narwhal depends on [slf4j](http://www.slf4j.org/) to do logging.
