@@ -38,7 +38,7 @@ public class ConnectionPoolTest {
             } finally {
                 pool.close();
             }
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
