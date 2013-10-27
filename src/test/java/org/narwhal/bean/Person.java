@@ -3,7 +3,7 @@ package org.narwhal.bean;
 import org.narwhal.annotation.Column;
 import org.narwhal.annotation.Table;
 
-import java.util.Date;
+import java.sql.Date;
 
 
 /**
