@@ -22,9 +22,9 @@ import java.util.List;
 public class DatabaseConnectionTest {
 
     private static final String driver       = "com.mysql.jdbc.Driver";
-    private static final String url          = "jdbc:mysql://localhost/test";
-    private static final String username     = "test";
-    private static final String password     = "test";
+    private static final String url          = "jdbc:mysql://localhost/person";
+    private static final String username     = "person";
+    private static final String password     = "person";
     private static final Date   johnBirthday = new Date(new GregorianCalendar(1990, 6, 9).getTime().getTime());
     private static final Date   doeBirthday  = new Date(new GregorianCalendar(1993, 3, 24).getTime().getTime());
 

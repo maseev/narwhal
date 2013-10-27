@@ -21,9 +21,9 @@ public class ConnectionPoolTest {
     @Test
     public void setSizeTest() {
         final String driver   = "com.mysql.jdbc.Driver";
-        final String url      = "jdbc:mysql://localhost/test";
-        final String username = "test";
-        final String password = "test";
+        final String url      = "jdbc:mysql://localhost/person";
+        final String username = "person";
+        final String password = "person";
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         ConnectionPool pool;
         int expectedPoolSize = 10;
