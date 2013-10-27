@@ -5,8 +5,6 @@ import org.narwhal.query.QueryCreator;
 import org.narwhal.util.Cache;
 import org.narwhal.util.MappedClassInformation;
 import org.narwhal.util.QueryType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.sql.*;
@@ -62,7 +60,6 @@ import java.util.*;
  */
 public class DatabaseConnection {
 
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseConnection.class);
     private static final Cache cache = new Cache();
     private Connection connection;
     private QueryCreator queryCreator;
@@ -218,7 +215,6 @@ public class DatabaseConnection {
                 close(preparedStatement);
             }
         } catch (SQLException ex) {
-            logger.error("Database access error has occurred", ex);
             close();
         }
 
@@ -273,7 +269,6 @@ public class DatabaseConnection {
                 close(preparedStatement);
             }
         } catch (SQLException ex) {
-            logger.error("Database access error has occurred", ex);
             close();
         }
 
@@ -329,7 +324,6 @@ public class DatabaseConnection {
                 close(preparedStatement);
             }
         } catch (SQLException ex) {
-            logger.error("Database access error has occurred", ex);
             close();
         }
 
@@ -354,7 +348,6 @@ public class DatabaseConnection {
      * */
     public void close() throws SQLException {
         connection.close();
-        logger.info("Database connection has been closed");
     }
 
     /**
@@ -408,7 +401,6 @@ public class DatabaseConnection {
                 parameters[i] = getters[i].invoke(object);
             }
         } catch (ReflectiveOperationException ex) {
-            logger.error("Reflective operation exception has occurred", ex);
             System.exit(-1);
         }
 
@@ -492,7 +484,6 @@ public class DatabaseConnection {
             classInformation = new MappedClassInformation(mappedClass, queryCreator);
             cache.put(mappedClass, classInformation);
         } catch (NoSuchMethodException ex) {
-            logger.error("Reflective operation exception has occurred", ex);
             System.exit(-1);
         }
 
@@ -512,7 +503,6 @@ public class DatabaseConnection {
         try {
             primaryKeyGetMethodValue = classInformation.getPrimaryKeyGetMethod().invoke(object);
         } catch (ReflectiveOperationException ex) {
-            logger.error("Reflective operation exception has occurred", ex);
             System.exit(-1);
         }
 
@@ -536,11 +526,9 @@ public class DatabaseConnection {
             Class.forName(databaseInformation.getDriver());
             connection = DriverManager.getConnection(url, username, password);
         } catch (ClassNotFoundException ex) {
-            logger.error("Class cannot be located", ex);
             System.exit(-1);
         }
 
-        logger.info("Database connection has been opened");
 
         return connection;
     }
@@ -586,7 +574,6 @@ public class DatabaseConnection {
                 setMethods[i].invoke(result, data);
             }
         } catch (ReflectiveOperationException ex) {
-            logger.error("Reflective operation exception has occurred", ex);
             System.exit(-1);
         }
 
