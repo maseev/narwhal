@@ -44,7 +44,7 @@ public class ConnectionPool {
      *                            all the information for making connection to the database.
      * @throws SQLException If any database access problems happened.
      * */
-    public ConnectionPool(DatabaseInformation databaseInformation, QueryCreator queryCreator) throws SQLException {
+    public ConnectionPool(DatabaseInformation databaseInformation, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
         this(databaseInformation, DEFAULT_POOL_SIZE, DEFAULT_ACQUIRE_INCREMENT, queryCreator);
     }
 
@@ -61,7 +61,7 @@ public class ConnectionPool {
      * @throws SQLException If any database access problems happened.
      * */
     public ConnectionPool(DatabaseInformation databaseInformation, int size,
-                          int acquireIncrement, QueryCreator queryCreator) throws SQLException {
+                          int acquireIncrement, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
         if (size < 1) {
             throw new IllegalArgumentException("Argument value must be equal or greater than 1: " + size);
         }
@@ -89,7 +89,7 @@ public class ConnectionPool {
      * @return DatabaseConnection object.
      * @throws SQLException If any database access problems happened.
      * */
-    public DatabaseConnection getConnection() throws SQLException {
+    public DatabaseConnection getConnection() throws SQLException, ClassNotFoundException {
         connectionsLock.lock();
         try {
             if (connections.isEmpty()) {
@@ -168,7 +168,7 @@ public class ConnectionPool {
      * @throws SQLException If any database access problems happened.
      * @param newSize The new pool's size.
      * */
-    public void setSize(int newSize) throws SQLException {
+    public void setSize(int newSize) throws SQLException, ClassNotFoundException {
         if (newSize < 1) {
             throw new IllegalArgumentException("Argument value must be equal or greater than 1: " + newSize);
         }
@@ -236,7 +236,7 @@ public class ConnectionPool {
      * @return List of the database connections.
      * @throws SQLException If any database access problems happened.
      * */
-    private List<DatabaseConnection> createDatabaseConnections(int requiredSize, QueryCreator queryCreator) throws SQLException {
+    private List<DatabaseConnection> createDatabaseConnections(int requiredSize, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
         List<DatabaseConnection> conn = new ArrayList<>(requiredSize);
 
         for (int i = 0; i < requiredSize; ++i) {
