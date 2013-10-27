@@ -1,16 +1,19 @@
-package org.narwhal.core;
+package org.narwhal.core.postgresql;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.narwhal.bean.Person;
+import org.narwhal.core.DatabaseConnection;
+import org.narwhal.core.DatabaseInformation;
+import org.narwhal.query.PostgreSQLQueryCreator;
 
+import java.sql.Date;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+
 
 /**
  * @author Miron Aseev
@@ -18,28 +21,28 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public class DatabaseConnectionTest {
 
-    private static final String driver       = "com.mysql.jdbc.Driver";
-    private static final String url          = "jdbc:mysql://localhost/bank";
-    private static final String username     = "lrngsql";
-    private static final String password     = "lrngsql";
-    private static final Date   johnBirthday = new GregorianCalendar(1990, 6, 9).getTime();
-    private static final Date   doeBirthday  = new GregorianCalendar(1993, 3, 24).getTime();
+    private static final String driver       = "org.postgresql.Driver";
+    private static final String url          = "jdbc:postgresql://localhost/test";
+    private static final String username     = "postgres";
+    private static final String password     = "admin";
+    private static final Date   johnBirthday = new Date(new GregorianCalendar(1990, 6, 9).getTime().getTime());
+    private static final Date   doeBirthday  = new Date(new GregorianCalendar(1993, 3, 24).getTime().getTime());
 
-    @Ignore
+
     @Test
-    public void transactionMethodsTest() throws SQLException {
+    public void transactionMethodsTest() throws SQLException, ClassNotFoundException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         int expectedRowAffected = 3;
         int result = 0;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
 
             try {
                 connection.beginTransaction();
 
-                result += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", null, "Test", new Date());
+                result += connection.executeUpdate("INSERT INTO Person (name, birthday) VALUES (?, ?)", "Test", new Date(new java.util.Date().getTime()));
                 result += connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "TestTest", "Test");
                 result += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
 
@@ -60,17 +63,16 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
-    public void createTest() throws SQLException {
+    public void createTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
-        Person person = new Person(null, "TestPerson", new Date());
+        Person person = new Person(null, "TestPerson", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
         int result;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             result = connection.persist(person);
         } finally {
             if (connection != null) {
@@ -85,15 +87,14 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
-    public void readTest() throws SQLException {
+    public void readTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         Person person;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             person = connection.read(Person.class, 1);
         } finally {
             if (connection != null) {
@@ -109,17 +110,16 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
-    public void updateTest() throws SQLException {
+    public void updateTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
-        Person person = new Person(1, "John Doe", new Date());
+        Person person = new Person(1, "John Doe", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
         int result;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             result = connection.update(person);
         } finally {
             if (connection != null) {
@@ -134,17 +134,16 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
-    public void deleteTest() throws SQLException {
+    public void deleteTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
-        Person person = new Person(1, "John", new Date());
+        Person person = new Person(1, "John", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
         int result;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             result = connection.delete(person);
         } finally {
             if (connection != null) {
@@ -159,9 +158,8 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
-    public void executeUpdateTest() throws SQLException {
+    public void executeUpdateTest() throws SQLException, ClassNotFoundException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         int doeId = 2;
@@ -169,7 +167,7 @@ public class DatabaseConnectionTest {
         int result;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             result = connection.executeUpdate("UPDATE Person SET name = ? WHERE id = ?", "FunnyName", doeId);
         } finally {
             if (connection != null) {
@@ -184,9 +182,8 @@ public class DatabaseConnectionTest {
         }
     }
 
-    @Ignore
     @Test
-    public void executeQueryTest() throws SQLException {
+    public void executeQueryTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         String expectedName = "John";
@@ -194,7 +191,7 @@ public class DatabaseConnectionTest {
         int joeId = 1;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             person = connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, joeId);
         } finally {
             if (connection != null) {
@@ -206,16 +203,15 @@ public class DatabaseConnectionTest {
         Assert.assertEquals(expectedName, person.getName());
     }
 
-    @Ignore
     @Test
-    public void executeQueryForCollectionTest() throws SQLException {
+    public void executeQueryForCollectionTest() throws SQLException, ReflectiveOperationException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
         List<Person> persons;
         int expectedSize = 2;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
             persons = connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
         } finally {
             if (connection != null) {
@@ -228,12 +224,12 @@ public class DatabaseConnectionTest {
         Assert.assertEquals("Doe", persons.get(1).getName());
     }
 
-    private void restoreDatabase() throws SQLException {
+    private void restoreDatabase() throws SQLException, ClassNotFoundException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
 
         try {
-            connection = new DatabaseConnection(databaseInformation);
+            connection = new DatabaseConnection(databaseInformation, new PostgreSQLQueryCreator());
 
             try {
                 connection.beginTransaction();

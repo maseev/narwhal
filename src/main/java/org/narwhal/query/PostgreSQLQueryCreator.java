@@ -8,15 +8,25 @@ public class PostgreSQLQueryCreator extends QueryCreator {
     public String makeInsertQuery(String tableName, String[] columns, String primaryColumnName) {
         StringBuilder builder = new StringBuilder("INSERT INTO ");
         builder.append(tableName);
-        builder.append(" VALUES (");
+        builder.append('(');
+        for (int i = 0; i < columns.length; ++i) {
+            if (!primaryColumnName.equals(columns[i])) {
+                builder.append(columns[i]);
+
+                if (i > 0 && i < columns.length - 1) {
+                    builder.append(',');
+                }
+            }
+        }
+        builder.append(") VALUES (");
 
         for (int i = 0; i < columns.length; ++i) {
             if (!primaryColumnName.equals(columns[i])) {
-                if (i > 0) {
+                builder.append('?');
+
+                if (i > 0 && i < columns.length - 1) {
                     builder.append(',');
                 }
-
-                builder.append('?');
             }
         }
         builder.append(')');

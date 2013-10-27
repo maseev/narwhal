@@ -1,17 +1,14 @@
 package org.narwhal.core;
 
+import org.narwhal.query.PostgreSQLQueryCreator;
 import org.narwhal.query.QueryCreator;
 import org.narwhal.util.Cache;
 import org.narwhal.util.MappedClassInformation;
 import org.narwhal.util.QueryType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -63,7 +60,6 @@ import java.util.List;
  */
 public class DatabaseConnection {
 
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseConnection.class);
     private static final Cache cache = new Cache();
     private Connection connection;
     private QueryCreator queryCreator;
@@ -76,7 +72,7 @@ public class DatabaseConnection {
      *                            all the information for making connection to the database.
      * @throws SQLException If any database access problems happened.
      * */
-    public DatabaseConnection(DatabaseInformation databaseInformation, QueryCreator queryCreator) throws SQLException {
+    public DatabaseConnection(DatabaseInformation databaseInformation, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
         connection = getConnection(databaseInformation);
         this.queryCreator = queryCreator;
     }
@@ -120,14 +116,15 @@ public class DatabaseConnection {
      * @return Number of rows that have been affected after performing sql query.
      * @throws SQLException If any database access problems happened.
      * */
-    public int persist(Object object) throws SQLException {
-        List<Object> parameters = new ArrayList<>();
-        parameters.addAll(Arrays.asList(getParameters(object)));
-
+    public int persist(Object object) throws SQLException, ReflectiveOperationException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.CREATE);
 
-        return executeUpdate(query, parameters.toArray());
+        if (queryCreator.getClass() == PostgreSQLQueryCreator.class) {
+            return executeUpdate(query, getParametersWithoutPrimaryKey(object));
+        } else {
+            return executeUpdate(query, getParameters(object));
+        }
     }
 
     /**
@@ -137,7 +134,7 @@ public class DatabaseConnection {
      * @param primaryKey primary key that is used to find a particular row in the database.
      * @throws SQLException If any database access problems happened.
      * */
-    public <T> T read(Class<T> mappedClass, Object primaryKey) throws SQLException {
+    public <T> T read(Class<T> mappedClass, Object primaryKey) throws SQLException, ReflectiveOperationException {
         MappedClassInformation classInformation = getMappedClassInformation(mappedClass);
         String query = classInformation.getQuery(QueryType.READ);
 
@@ -151,7 +148,7 @@ public class DatabaseConnection {
      * @return Number of rows that have been affected after performing sql query.
      * @throws SQLException If any database access problems happened.
      * */
-    public int update(Object object) throws SQLException {
+    public int update(Object object) throws SQLException, ReflectiveOperationException {
         List<Object> parameters = new ArrayList<>();
         parameters.addAll(Arrays.asList(getParameters(object)));
         parameters.add(getPrimaryKeyMethodValue(object));
@@ -169,7 +166,7 @@ public class DatabaseConnection {
      * @return Number of rows that have been affected after performing sql query.
      * @throws SQLException If any database access problems happened.
      * */
-    public int delete(Object object) throws SQLException {
+    public int delete(Object object) throws SQLException, ReflectiveOperationException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.DELETE);
         Object primaryKey = getPrimaryKeyMethodValue(object);
@@ -218,7 +215,6 @@ public class DatabaseConnection {
                 close(preparedStatement);
             }
         } catch (SQLException ex) {
-            logger.error("Database access error has occurred", ex);
             close();
         }
 
@@ -255,7 +251,7 @@ public class DatabaseConnection {
      * @return Mapped object that was created by based on the data from the result set.
      * @throws SQLException If any database access problems happened.
      * */
-    public <T> T executeQuery(String query, Class<T> mappedClass, Object... parameters) throws SQLException {
+    public <T> T executeQuery(String query, Class<T> mappedClass, Object... parameters) throws SQLException, ReflectiveOperationException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         T result = null;
@@ -273,7 +269,6 @@ public class DatabaseConnection {
                 close(preparedStatement);
             }
         } catch (SQLException ex) {
-            logger.error("Database access error has occurred", ex);
             close();
         }
 
@@ -311,7 +306,7 @@ public class DatabaseConnection {
      * @return A List of the entity objects. Objects have type that was pointed as a second parameter.
      * @throws SQLException If any database access problems happened.
      * */
-    public <T> List<T> executeQueryForCollection(String query, Class<T> mappedClass, Object... parameters) throws SQLException {
+    public <T> List<T> executeQueryForCollection(String query, Class<T> mappedClass, Object... parameters) throws SQLException, ReflectiveOperationException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         List<T> collection = new ArrayList<>();
@@ -329,23 +324,11 @@ public class DatabaseConnection {
                 close(preparedStatement);
             }
         } catch (SQLException ex) {
-            logger.error("Database access error has occurred", ex);
             close();
         }
 
         return collection;
     }
-
-    /**
-     * Makes connection to the database.
-     *
-     * @param databaseInformation Instance of the DatabaseInformation class that keeps all the information
-     *                            about database connection like database driver's name, url, username and password.
-     * @throws SQLException If any database access problems happened.
-     * */
-     public void connect(DatabaseInformation databaseInformation) throws SQLException {
-        connection = getConnection(databaseInformation);
-     }
 
     /**
      * Closes database connection.
@@ -354,7 +337,6 @@ public class DatabaseConnection {
      * */
     public void close() throws SQLException {
         connection.close();
-        logger.info("Database connection has been closed");
     }
 
     /**
@@ -368,36 +350,37 @@ public class DatabaseConnection {
     }
 
     /**
-     * Returns raw connection object.
-     *
-     * @return Connection object corresponding to the DatabaseConnection object.
-     * */
-    public Connection getRawConnection() {
-        return connection;
-    }
-
-    /**
      * Returns array of the parameters for the subsequent creating prepared statement.
      *
      * @param object Entity class whose data fields are used to persist array of the parameters.
      * @return Array of the parameters.
      * */
     @SuppressWarnings("unchecked")
-    private Object[] getParameters(Object object) {
-        List<Object> parameters = new ArrayList<>();
+    private Object[] getParameters(Object object) throws ReflectiveOperationException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         Method[] getMethods = classInformation.getGetMethods();
 
-        try {
-            for (Method method : getMethods) {
-                parameters.add(method.invoke(object));
-            }
-        } catch (ReflectiveOperationException ex) {
-            logger.error("Reflective operation exception has occurred", ex);
-            System.exit(-1);
+        return retrieveParameters(object, getMethods);
+    }
+
+    private Object[] getParametersWithoutPrimaryKey(Object object) throws ReflectiveOperationException{
+        MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
+        Method[] getMethods = classInformation.getGetMethods();
+        Method primaryKeyGetter = classInformation.getPrimaryKeyGetMethod();
+        Set<Method> filteredGetters = new LinkedHashSet<>(Arrays.asList(getMethods));
+        filteredGetters.remove(primaryKeyGetter);
+
+        return retrieveParameters(object, filteredGetters.toArray(new Method[filteredGetters.size()]));
+    }
+
+    private Object[] retrieveParameters(Object object, Method[] getters) throws ReflectiveOperationException {
+        Object[] parameters = new Object[getters.length];
+
+        for (int i = 0; i < getters.length; ++i) {
+            parameters[i] = getters[i].invoke(object);
         }
 
-        return parameters.toArray();
+        return parameters;
     }
 
     /**
@@ -466,22 +449,12 @@ public class DatabaseConnection {
      *         all information about a particular class (methods, constructors etc.).
      * */
     @SuppressWarnings("unchecked")
-    private MappedClassInformation getMappedClassInformation(Class mappedClass) {
+    private MappedClassInformation getMappedClassInformation(Class mappedClass) throws NoSuchMethodException{
         if (cache.containsKey(mappedClass)) {
            return cache.get(mappedClass);
         }
 
-        MappedClassInformation classInformation = null;
-
-        try {
-            classInformation = new MappedClassInformation(mappedClass, queryCreator);
-            cache.put(mappedClass, classInformation);
-        } catch (NoSuchMethodException ex) {
-            logger.error("Reflective operation exception has occurred", ex);
-            System.exit(-1);
-        }
-
-        return classInformation;
+        return cache.put(mappedClass, new MappedClassInformation(mappedClass, queryCreator));
     }
 
     /**
@@ -490,18 +463,10 @@ public class DatabaseConnection {
      *
      * @param object Entity class which method is used to be invoked.
      * */
-    private Object getPrimaryKeyMethodValue(Object object) {
+    private Object getPrimaryKeyMethodValue(Object object) throws ReflectiveOperationException{
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
-        Object primaryKeyGetMethodValue = null;
 
-        try {
-            primaryKeyGetMethodValue = classInformation.getPrimaryKeyGetMethod().invoke(object);
-        } catch (ReflectiveOperationException ex) {
-            logger.error("Reflective operation exception has occurred", ex);
-            System.exit(-1);
-        }
-
-        return primaryKeyGetMethodValue;
+        return classInformation.getPrimaryKeyGetMethod().invoke(object);
     }
 
     /**
@@ -512,20 +477,13 @@ public class DatabaseConnection {
      * @return A new Connection object associated with particular database.
      * @throws SQLException If any database access problems happened.
      * */
-    private Connection getConnection(DatabaseInformation databaseInformation) throws SQLException {
+    private Connection getConnection(DatabaseInformation databaseInformation) throws SQLException, ClassNotFoundException {
         String url = databaseInformation.getUrl();
         String username = databaseInformation.getUsername();
         String password = databaseInformation.getPassword();
 
-        try {
-            Class.forName(databaseInformation.getDriver());
-            connection = DriverManager.getConnection(url, username, password);
-        } catch (ClassNotFoundException ex) {
-            logger.error("Class cannot be located", ex);
-            System.exit(-1);
-        }
-
-        logger.info("Database connection has been opened");
+        Class.forName(databaseInformation.getDriver());
+        connection = DriverManager.getConnection(url, username, password);
 
         return connection;
     }
@@ -541,7 +499,7 @@ public class DatabaseConnection {
      * @throws SQLException If any database access problems happened.
      * */
      @SuppressWarnings("unchecked")
-     private <T> T createEntity(ResultSet resultSet, Class<T> mappedClass) throws SQLException {
+     private <T> T createEntity(ResultSet resultSet, Class<T> mappedClass) throws SQLException, ReflectiveOperationException {
         return (T) createEntitySupporter(resultSet, getMappedClassInformation(mappedClass));
      }
 
@@ -558,23 +516,16 @@ public class DatabaseConnection {
      * @return Instance of the class that has been pointed as a second parameter.
      * @throws SQLException If any database access problems happened.
      * */
-     private <T> T createEntitySupporter(ResultSet resultSet, MappedClassInformation<T> classInformation) throws SQLException {
+     private <T> T createEntitySupporter(ResultSet resultSet, MappedClassInformation<T> classInformation) throws SQLException, ReflectiveOperationException {
         Method[] setMethods = classInformation.getSetMethods();
         String[] columns = classInformation.getColumns();
-        T result = null;
+        T result = classInformation.getConstructor().newInstance();
 
-        try {
-            result = classInformation.getConstructor().newInstance();
-
-            for (int i = 0; i < columns.length; ++i) {
-                Object data = resultSet.getObject(columns[i]);
-                setMethods[i].invoke(result, data);
-            }
-        } catch (ReflectiveOperationException ex) {
-            logger.error("Reflective operation exception has occurred", ex);
-            System.exit(-1);
+        for (int i = 0; i < columns.length; ++i) {
+            Object data = resultSet.getObject(columns[i]);
+            setMethods[i].invoke(result, data);
         }
 
         return result;
-    }
+     }
 }

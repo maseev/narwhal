@@ -238,8 +238,7 @@ public class MappedClassInformation<T> {
         Method[] methods = new Method[fields.length];
 
         for (int i = 0; i < fields.length; ++i) {
-            String methodName = getGetMethodName(fields[i]);
-            methods[i] = mappedClass.getMethod(methodName);
+            methods[i] = mappedClass.getMethod(getGetMethodName(fields[i]));
         }
 
         return methods;
@@ -258,8 +257,7 @@ public class MappedClassInformation<T> {
         for (Field field : fields) {
             if (field.isAnnotationPresent(Column.class) &&
                 field.getAnnotation(Column.class).primaryKey()) {
-                String methodName = getGetMethodName(field);
-                return mappedClass.getMethod(methodName);
+                return mappedClass.getMethod(getGetMethodName(field));
             }
         }
 
