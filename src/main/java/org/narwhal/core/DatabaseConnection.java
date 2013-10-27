@@ -331,17 +331,6 @@ public class DatabaseConnection {
     }
 
     /**
-     * Makes connection to the database.
-     *
-     * @param databaseInformation Instance of the DatabaseInformation class that keeps all the information
-     *                            about database connection like database driver's name, url, username and password.
-     * @throws SQLException If any database access problems happened.
-     * */
-     public void connect(DatabaseInformation databaseInformation) throws SQLException, ClassNotFoundException {
-        connection = getConnection(databaseInformation);
-     }
-
-    /**
      * Closes database connection.
      *
      * @throws SQLException If any database access problems happened.
@@ -358,15 +347,6 @@ public class DatabaseConnection {
      * */
     public boolean isClosed() throws SQLException {
         return connection.isClosed();
-    }
-
-    /**
-     * Returns raw connection object.
-     *
-     * @return Connection object corresponding to the DatabaseConnection object.
-     * */
-    public Connection getRawConnection() {
-        return connection;
     }
 
     /**
