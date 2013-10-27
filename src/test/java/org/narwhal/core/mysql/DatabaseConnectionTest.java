@@ -9,8 +9,8 @@ import org.narwhal.core.DatabaseConnection;
 import org.narwhal.core.DatabaseInformation;
 import org.narwhal.query.MysqlQueryCreator;
 
+import java.sql.Date;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -25,10 +25,10 @@ public class DatabaseConnectionTest {
     private static final String url          = "jdbc:mysql://localhost/test";
     private static final String username     = "test";
     private static final String password     = "test";
-    private static final Date   johnBirthday = new GregorianCalendar(1990, 6, 9).getTime();
-    private static final Date   doeBirthday  = new GregorianCalendar(1993, 3, 24).getTime();
+    private static final Date   johnBirthday = new Date(new GregorianCalendar(1990, 6, 9).getTime().getTime());
+    private static final Date   doeBirthday  = new Date(new GregorianCalendar(1993, 3, 24).getTime().getTime());
 
-
+    
     @Test
     public void transactionMethodsTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -42,7 +42,7 @@ public class DatabaseConnectionTest {
             try {
                 connection.beginTransaction();
 
-                result += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", null, "Test", new Date());
+                result += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", null, "Test", new Date(new java.util.Date().getTime()));
                 result += connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "TestTest", "Test");
                 result += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
 
@@ -62,12 +62,12 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-
+    
     @Test
     public void createTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
-        Person person = new Person(null, "TestPerson", new Date());
+        Person person = new Person(null, "TestPerson", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
         int result;
 
@@ -86,7 +86,7 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-
+    
     @Test
     public void readTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -109,12 +109,12 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-
+    
     @Test
     public void updateTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
-        Person person = new Person(1, "John Doe", new Date());
+        Person person = new Person(1, "John Doe", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
         int result;
 
@@ -133,12 +133,12 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-
+    
     @Test
     public void deleteTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
         DatabaseConnection connection = null;
-        Person person = new Person(1, "John", new Date());
+        Person person = new Person(1, "John", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
         int result;
 
@@ -157,7 +157,7 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-
+    
     @Test
     public void executeUpdateTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -181,7 +181,7 @@ public class DatabaseConnectionTest {
             restoreDatabase();
         }
     }
-
+    
     @Test
     public void executeQueryTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
@@ -202,7 +202,7 @@ public class DatabaseConnectionTest {
         Assert.assertNotNull(person);
         Assert.assertEquals(expectedName, person.getName());
     }
-
+    
     @Test
     public void executeQueryForCollectionTest() throws SQLException {
         DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
