@@ -71,12 +71,16 @@ public class DatabaseConnection {
      * @param databaseInformation instance of {@code DatabaseInformation} class that includes
      *                            all the information for making connection to the database.
      * @throws SQLException If any database access problems happened.
+     * @throws ClassNotFoundException IF there's any error with finding a jdbc driver class.
      * */
     public DatabaseConnection(DatabaseInformation databaseInformation, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
         connection = getConnection(databaseInformation);
         this.queryCreator = queryCreator;
     }
 
+    /**
+     * Clears cache that has information about mapped classes.
+     * */
     public static void clearCache() {
         cache.clean();
     }
@@ -119,6 +123,7 @@ public class DatabaseConnection {
      * @param object Entity object that should be persisted in the database.
      * @return Number of rows that have been affected after performing sql query.
      * @throws SQLException If any database access problems happened.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
     public int persist(Object object) throws SQLException, ReflectiveOperationException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
@@ -137,6 +142,7 @@ public class DatabaseConnection {
      * @param mappedClass A Class, whose annotated fields will be used for creating corresponding entity.
      * @param primaryKey primary key that is used to find a particular row in the database.
      * @throws SQLException If any database access problems happened.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
     public <T> T read(Class<T> mappedClass, Object primaryKey) throws SQLException, ReflectiveOperationException {
         MappedClassInformation classInformation = getMappedClassInformation(mappedClass);
@@ -151,6 +157,7 @@ public class DatabaseConnection {
      * @param object entity which data will be used to update row in the database.
      * @return Number of rows that have been affected after performing sql query.
      * @throws SQLException If any database access problems happened.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
     public int update(Object object) throws SQLException, ReflectiveOperationException {
         List<Object> parameters = new ArrayList<>();
@@ -169,6 +176,7 @@ public class DatabaseConnection {
      * @param  object entity that will be deleted from the database.
      * @return Number of rows that have been affected after performing sql query.
      * @throws SQLException If any database access problems happened.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
     public int delete(Object object) throws SQLException, ReflectiveOperationException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
@@ -254,6 +262,7 @@ public class DatabaseConnection {
      *                   symbols in the SQL query parameter.
      * @return Mapped object that was created by based on the data from the result set.
      * @throws SQLException If any database access problems happened.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
     public <T> T executeQuery(String query, Class<T> mappedClass, Object... parameters) throws SQLException, ReflectiveOperationException {
         PreparedStatement preparedStatement = null;
@@ -309,6 +318,7 @@ public class DatabaseConnection {
      *                   symbols in the SQL query parameter.
      * @return A List of the entity objects. Objects have type that was pointed as a second parameter.
      * @throws SQLException If any database access problems happened.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
     public <T> List<T> executeQueryForCollection(String query, Class<T> mappedClass, Object... parameters) throws SQLException, ReflectiveOperationException {
         PreparedStatement preparedStatement = null;
@@ -358,6 +368,7 @@ public class DatabaseConnection {
      *
      * @param object Entity class whose data fields are used to persist array of the parameters.
      * @return Array of the parameters.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
     @SuppressWarnings("unchecked")
     private Object[] getParameters(Object object) throws ReflectiveOperationException {
@@ -367,6 +378,15 @@ public class DatabaseConnection {
         return retrieveParameters(object, getMethods);
     }
 
+    /**
+     * Returns an array which contains a values of the class's instance fields.
+     * Array doesn't include value for the field which was marked as a primary key.
+     *
+     * @return Array which contains a values of the class's instance fields.
+     *         Resulting array doesn't have value of the field which was marked by annotation as a primary key {@literal Column}(primaryKey = true).
+     * @param object Instance of a particular class from which the parameters will be extracted.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
+     * */
     private Object[] getParametersWithoutPrimaryKey(Object object) throws ReflectiveOperationException{
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         Method[] getMethods = classInformation.getGetMethods();
@@ -377,6 +397,14 @@ public class DatabaseConnection {
         return retrieveParameters(object, filteredGetters.toArray(new Method[filteredGetters.size()]));
     }
 
+    /**
+     * Returns an array which contains a values of the class's instance fields.
+     *
+     * @return Array which contains a values of the class's instance fields.
+     * @param object Instance of a particular class from which the parameters will be extracted.
+     * @param getters Array which contains all getters of a particular class.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
+     * */
     private Object[] retrieveParameters(Object object, Method[] getters) throws ReflectiveOperationException {
         Object[] parameters = new Object[getters.length];
 
@@ -451,6 +479,7 @@ public class DatabaseConnection {
      * @param mappedClass A Class, whose annotated fields will be used for creating corresponding entity.
      * @return Instance of the MappedClassInformation class that describes
      *         all information about a particular class (methods, constructors etc.).
+     * @throws NoSuchMethodException If there's no method to invoke.
      * */
     @SuppressWarnings("unchecked")
     private MappedClassInformation getMappedClassInformation(Class mappedClass) throws NoSuchMethodException{
@@ -469,6 +498,7 @@ public class DatabaseConnection {
      * annotation with primaryKey = true by invoking getter method.
      *
      * @param object Entity class which method is used to be invoked.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
     private Object getPrimaryKeyMethodValue(Object object) throws ReflectiveOperationException{
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
@@ -483,6 +513,7 @@ public class DatabaseConnection {
      *                            about database connection like database driver's name, url, username and password.
      * @return A new Connection object associated with particular database.
      * @throws SQLException If any database access problems happened.
+     * @throws ClassNotFoundException If there's any problem with finding a JDBC driver class.
      * */
     private Connection getConnection(DatabaseInformation databaseInformation) throws SQLException, ClassNotFoundException {
         String url = databaseInformation.getUrl();
@@ -504,6 +535,7 @@ public class DatabaseConnection {
      * @param mappedClass Class, whose annotated fields will be used for creating corresponding entity.
      * @return Instance of the class that has been pointed as a second parameter.
      * @throws SQLException If any database access problems happened.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
      @SuppressWarnings("unchecked")
      private <T> T createEntity(ResultSet resultSet, Class<T> mappedClass) throws SQLException, ReflectiveOperationException {
@@ -522,6 +554,7 @@ public class DatabaseConnection {
      * @param classInformation Instance of MappedClassInformation that holds all information about mapped class.
      * @return Instance of the class that has been pointed as a second parameter.
      * @throws SQLException If any database access problems happened.
+     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
      private <T> T createEntitySupporter(ResultSet resultSet, MappedClassInformation<T> classInformation) throws SQLException, ReflectiveOperationException {
         Method[] setMethods = classInformation.getSetMethods();
