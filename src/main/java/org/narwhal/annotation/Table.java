@@ -16,6 +16,7 @@ import java.lang.annotation.Target;
 @Retention(value = RetentionPolicy.RUNTIME)
 public @interface Table {
 
+
     /**
      * Returns a table name that maps
      * to the particular entity.

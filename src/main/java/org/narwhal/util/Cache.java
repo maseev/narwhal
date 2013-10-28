@@ -18,6 +18,7 @@ public class Cache {
     private Lock writeLock;
     private Map<Class, MappedClassInformation> entityCache;
 
+
     /**
      * Initializes a new instance of the Cache class.
      * */
