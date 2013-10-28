@@ -77,6 +77,9 @@ public class Cache {
         }
     }
 
+    /**
+     * Removes all elements from the cache.
+     * */
     public void clean() {
         readLock.lock();
         try {
