@@ -43,6 +43,7 @@ public class ConnectionPool {
      * @param databaseInformation instance of {@code DatabaseInformation} class that includes
      *                            all the information for making connection to the database.
      * @throws SQLException If any database access problems happened.
+     * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
     public ConnectionPool(DatabaseInformation databaseInformation, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
         this(databaseInformation, DEFAULT_POOL_SIZE, DEFAULT_ACQUIRE_INCREMENT, queryCreator);
@@ -59,6 +60,7 @@ public class ConnectionPool {
      * @param size the size of the pool.
      * @param acquireIncrement the acquire increment of the pool.
      * @throws SQLException If any database access problems happened.
+     * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
     public ConnectionPool(DatabaseInformation databaseInformation, int size,
                           int acquireIncrement, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
@@ -88,6 +90,7 @@ public class ConnectionPool {
      *
      * @return DatabaseConnection object.
      * @throws SQLException If any database access problems happened.
+     * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
     public DatabaseConnection getConnection() throws SQLException, ClassNotFoundException {
         connectionsLock.lock();
@@ -165,8 +168,9 @@ public class ConnectionPool {
      * Sets new size of the pool. If the new size of the pool is smaller than initial size,
      * then pool will be condensed to the new size. Unnecessary connections will be closed.
      *
+     *      * @param newSize The new pool's size.
      * @throws SQLException If any database access problems happened.
-     * @param newSize The new pool's size.
+     * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
     public void setSize(int newSize) throws SQLException, ClassNotFoundException {
         if (newSize < 1) {
@@ -235,6 +239,7 @@ public class ConnectionPool {
      * @param requiredSize Number of the database connection.
      * @return List of the database connections.
      * @throws SQLException If any database access problems happened.
+     * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
     private List<DatabaseConnection> createDatabaseConnections(int requiredSize, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
         List<DatabaseConnection> conn = new ArrayList<>(requiredSize);

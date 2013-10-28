@@ -92,9 +92,9 @@ public class MappedClassInformation<T> {
     }
 
     /**
-     * Returns default constructor of the class.
+     * Returns a default constructor of a class.
      *
-     * @return Default constructor of the class.
+     * @return Default constructor of a class.
      * */
     public Constructor<T> getConstructor() {
         return constructor;

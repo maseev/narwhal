@@ -1,6 +1,11 @@
 package org.narwhal.query;
 
 
+/**
+ * PostgreSQLQueryCreator is a class which is responsible for creating
+ * string representation of the CRUD SQL statements for PostgreSQL database.
+ * This class implementation depends on PostgreSQL SQL syntax.
+ * */
 public class PostgreSQLQueryCreator extends QueryCreator {
 
 

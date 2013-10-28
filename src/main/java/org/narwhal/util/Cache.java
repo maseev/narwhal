@@ -18,6 +18,7 @@ public class Cache {
     private Lock writeLock;
     private Map<Class, MappedClassInformation> entityCache;
 
+
     /**
      * Initializes a new instance of the Cache class.
      * */
@@ -77,6 +78,9 @@ public class Cache {
         }
     }
 
+    /**
+     * Removes all elements from the cache.
+     * */
     public void clean() {
         readLock.lock();
         try {
