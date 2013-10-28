@@ -167,8 +167,7 @@ public class ConnectionPool {
     /**
      * Sets new size of the pool. If the new size of the pool is smaller than initial size,
      * then pool will be condensed to the new size. Unnecessary connections will be closed.
-     *
-     *      * @param newSize The new pool's size.
+     * @param newSize The new pool's size.
      * @throws SQLException If any database access problems happened.
      * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
