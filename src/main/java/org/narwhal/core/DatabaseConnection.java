@@ -390,11 +390,16 @@ public class DatabaseConnection {
     private Object[] getParametersWithoutPrimaryKey(Object object) throws ReflectiveOperationException{
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         Method[] getMethods = classInformation.getGetMethods();
+        Method[] filteredGetters = new Method[getMethods.length - 1];
         Method primaryKeyGetter = classInformation.getPrimaryKeyGetMethod();
-        Set<Method> filteredGetters = new LinkedHashSet<>(Arrays.asList(getMethods));
-        filteredGetters.remove(primaryKeyGetter);
 
-        return retrieveParameters(object, filteredGetters.toArray(new Method[filteredGetters.size()]));
+        for (int i = 0, k = 0; i < getMethods.length; ++i) {
+            if (!primaryKeyGetter.equals(getMethods[i])) {
+                filteredGetters[k++] = getMethods[i];
+            }
+        }
+        
+        return retrieveParameters(object, filteredGetters);
     }
 
     /**
