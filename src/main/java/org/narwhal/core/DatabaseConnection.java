@@ -2,13 +2,16 @@ package org.narwhal.core;
 
 import org.narwhal.query.PostgreSQLQueryCreator;
 import org.narwhal.query.QueryCreator;
-import org.narwhal.util.Cache;
 import org.narwhal.util.MappedClassInformation;
 import org.narwhal.util.QueryType;
 
 import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -60,7 +63,7 @@ import java.util.*;
  */
 public class DatabaseConnection {
 
-    private static final Cache cache = new Cache();
+    private static final Map<Class, MappedClassInformation> cache = new ConcurrentHashMap<>();
     private Connection connection;
     private QueryCreator queryCreator;
 
@@ -82,7 +85,7 @@ public class DatabaseConnection {
      * Clears cache that has information about mapped classes.
      * */
     public static void clearCache() {
-        cache.clean();
+        cache.clear();
     }
 
     /**
