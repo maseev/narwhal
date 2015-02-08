@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 /**
  * <p>
  * The <code>DatabaseConnection</code> represents connection to the relational database.
@@ -64,9 +63,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DatabaseConnection {
 
     private static final Map<Class, MappedClassInformation> cache = new ConcurrentHashMap<>();
-    private Connection connection;
-    private QueryCreator queryCreator;
 
+    private Connection connection;
+
+    private QueryCreator queryCreator;
 
     /**
      * Initializes a new instance of the DatabaseConnection class and trying to connect to the database.
@@ -76,7 +76,8 @@ public class DatabaseConnection {
      * @throws SQLException If any database access problems happened.
      * @throws ClassNotFoundException IF there's any error with finding a jdbc driver class.
      * */
-    public DatabaseConnection(DatabaseInformation databaseInformation, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
+    public DatabaseConnection(DatabaseInformation databaseInformation,
+                              QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
         connection = getConnection(databaseInformation);
         this.queryCreator = queryCreator;
     }
@@ -267,7 +268,8 @@ public class DatabaseConnection {
      * @throws SQLException If any database access problems happened.
      * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
-    public <T> T executeQuery(String query, Class<T> mappedClass, Object... parameters) throws SQLException, ReflectiveOperationException {
+    public <T> T executeQuery(String query, Class<T> mappedClass,
+                              Object... parameters) throws SQLException, ReflectiveOperationException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         T result = null;
@@ -323,7 +325,10 @@ public class DatabaseConnection {
      * @throws SQLException If any database access problems happened.
      * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
-    public <T> List<T> executeQueryForCollection(String query, Class<T> mappedClass, Object... parameters) throws SQLException, ReflectiveOperationException {
+    public <T> List<T> executeQueryForCollection(String query,
+                                                 Class<T> mappedClass,
+                                                 Object... parameters) throws SQLException,
+                                                                              ReflectiveOperationException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         List<T> collection = new ArrayList<>();
@@ -564,7 +569,9 @@ public class DatabaseConnection {
      * @throws SQLException If any database access problems happened.
      * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
-     private <T> T createEntitySupporter(ResultSet resultSet, MappedClassInformation<T> classInformation) throws SQLException, ReflectiveOperationException {
+     private <T> T createEntitySupporter(ResultSet resultSet,
+                                         MappedClassInformation<T> classInformation) throws SQLException,
+                                                                                            ReflectiveOperationException {
         Method[] setMethods = classInformation.getSetMethods();
         String[] columns = classInformation.getColumns();
         T result = classInformation.getConstructor().newInstance();

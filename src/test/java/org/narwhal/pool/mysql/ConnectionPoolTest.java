@@ -9,13 +9,11 @@ import org.narwhal.core.DatabaseInformation;
 import org.narwhal.pool.ConnectionPool;
 import org.narwhal.query.MysqlQueryCreator;
 
-
 /**
  * @author Miron Aseev
  */
 @RunWith(JUnit4.class)
 public class ConnectionPoolTest {
-
 
     @Test
     public void setSizeTest() {

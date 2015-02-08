@@ -1,12 +1,10 @@
 package org.narwhal.query;
 
-
 /**
  * QueryCreator is a class which is responsible for creating string representation of the CRUD SQL statements.
  * This class implementation doesn't depend on any particular database syntax.
  * */
 public abstract class QueryCreator {
-
 
     /**
      * Builds up a string representation of an INSERT SQL statement for the subsequent usage in a prepared statement.

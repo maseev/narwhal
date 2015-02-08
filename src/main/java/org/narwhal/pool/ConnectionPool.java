@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 /**
  * The <code>ConnectionPool</code> class implements
  * basic functionality that allows end-users persist
@@ -23,13 +22,21 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ConnectionPool {
 
     private static final int DEFAULT_POOL_SIZE = 5;
+
     private static final int DEFAULT_ACQUIRE_INCREMENT = 5;
+
     private int size;
+
     private int acquireIncrement;
+
     private DatabaseInformation databaseInformation;
+
     private Lock connectionsLock;
+
     private Lock variableLock;
+
     private List<DatabaseConnection> connections;
+
     private QueryCreator queryCreator;
 
 
@@ -45,7 +52,8 @@ public class ConnectionPool {
      * @throws SQLException If any database access problems happened.
      * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
-    public ConnectionPool(DatabaseInformation databaseInformation, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
+    public ConnectionPool(DatabaseInformation databaseInformation,
+                          QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
         this(databaseInformation, DEFAULT_POOL_SIZE, DEFAULT_ACQUIRE_INCREMENT, queryCreator);
     }
 
@@ -240,7 +248,9 @@ public class ConnectionPool {
      * @throws SQLException If any database access problems happened.
      * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
-    private List<DatabaseConnection> createDatabaseConnections(int requiredSize, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
+    private List<DatabaseConnection> createDatabaseConnections(int requiredSize,
+                                                               QueryCreator queryCreator) throws SQLException,
+                                                                                                 ClassNotFoundException {
         List<DatabaseConnection> conn = new ArrayList<>(requiredSize);
 
         for (int i = 0; i < requiredSize; ++i) {

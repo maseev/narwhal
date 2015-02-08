@@ -1,6 +1,5 @@
 package org.narwhal.query;
 
-
 /**
  * MysqlQueryCreator is a class which is responsible for creating
  * string representation of the CRUD SQL statements for MySQL database.

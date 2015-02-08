@@ -10,7 +10,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * The <code>MappedClassInformation</code> class keeps all the information about particular class.
  * Instance of this class holds data about set methods, constructors and columns name of the database
@@ -19,13 +18,18 @@ import java.util.Map;
 public class MappedClassInformation<T> {
 
     private Constructor<T> constructor;
-    private Method[] setMethods;
-    private Method[] getMethods;
-    private String[] columns;
-    private Method primaryKeyGetMethod;
-    private Map<QueryType, String> queries;
-    private String primaryColumnName;
 
+    private Method[] setMethods;
+
+    private Method[] getMethods;
+
+    private String[] columns;
+
+    private Method primaryKeyGetMethod;
+
+    private Map<QueryType, String> queries;
+
+    private String primaryColumnName;
 
     /**
      * Initializes a new instance of the MappedClassInformation class.

@@ -9,7 +9,6 @@ import org.narwhal.core.DatabaseInformation;
 import org.narwhal.pool.ConnectionPool;
 import org.narwhal.query.PostgreSQLQueryCreator;
 
-
 /**
  * @author Miron Aseev
  */

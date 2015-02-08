@@ -14,24 +14,27 @@ import java.sql.SQLException;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-
 /**
  * @author Miron Aseev
  */
 @RunWith(JUnit4.class)
 public class DatabaseConnectionTest {
 
-    private static final String driver       = "com.mysql.jdbc.Driver";
-    private static final String url          = "jdbc:mysql://localhost/person";
-    private static final String username     = "person";
-    private static final String password     = "person";
-    private static final Date   johnBirthday = new Date(new GregorianCalendar(1990, 6, 9).getTime().getTime());
-    private static final Date   doeBirthday  = new Date(new GregorianCalendar(1993, 3, 24).getTime().getTime());
+    private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
 
+    private static final String CONNECTION_URL = "jdbc:mysql://localhost/person";
+
+    private static final String USERNAME = "person";
+
+    private static final String PASSWORD = "person";
+
+    private static final Date johnBirthday = new Date(new GregorianCalendar(1990, 6, 9).getTime().getTime());
+
+    private static final Date doeBirthday  = new Date(new GregorianCalendar(1993, 3, 24).getTime().getTime());
 
     @Test
     public void transactionMethodsTest() throws SQLException, ClassNotFoundException {
-        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseInformation databaseInformation = new DatabaseInformation(DRIVER_NAME, CONNECTION_URL, USERNAME, PASSWORD);
         DatabaseConnection connection = null;
         int expectedRowAffected = 3;
         int result = 0;
@@ -67,7 +70,7 @@ public class DatabaseConnectionTest {
 
     @Test
     public void createTest() throws SQLException, ReflectiveOperationException {
-        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseInformation databaseInformation = new DatabaseInformation(DRIVER_NAME, CONNECTION_URL, USERNAME, PASSWORD);
         DatabaseConnection connection = null;
         Person person = new Person(null, "TestPerson", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
@@ -93,7 +96,7 @@ public class DatabaseConnectionTest {
 
     @Test
     public void readTest() throws SQLException, ReflectiveOperationException {
-        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseInformation databaseInformation = new DatabaseInformation(DRIVER_NAME, CONNECTION_URL, USERNAME, PASSWORD);
         DatabaseConnection connection = null;
         Person person;
 
@@ -118,7 +121,7 @@ public class DatabaseConnectionTest {
 
     @Test
     public void updateTest() throws SQLException, ReflectiveOperationException {
-        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseInformation databaseInformation = new DatabaseInformation(DRIVER_NAME, CONNECTION_URL, USERNAME, PASSWORD);
         DatabaseConnection connection = null;
         Person person = new Person(1, "John Doe", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
@@ -144,7 +147,7 @@ public class DatabaseConnectionTest {
 
     @Test
     public void deleteTest() throws SQLException, ReflectiveOperationException {
-        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseInformation databaseInformation = new DatabaseInformation(DRIVER_NAME, CONNECTION_URL, USERNAME, PASSWORD);
         DatabaseConnection connection = null;
         Person person = new Person(1, "John", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
@@ -170,7 +173,7 @@ public class DatabaseConnectionTest {
 
     @Test
     public void executeUpdateTest() throws SQLException, ReflectiveOperationException {
-        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseInformation databaseInformation = new DatabaseInformation(DRIVER_NAME, CONNECTION_URL, USERNAME, PASSWORD);
         DatabaseConnection connection = null;
         int doeId = 2;
         int expectedRowAffected = 1;
@@ -196,7 +199,7 @@ public class DatabaseConnectionTest {
 
     @Test
     public void executeQueryTest() throws SQLException, ReflectiveOperationException {
-        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseInformation databaseInformation = new DatabaseInformation(DRIVER_NAME, CONNECTION_URL, USERNAME, PASSWORD);
         DatabaseConnection connection = null;
         String expectedName = "John";
         Person person;
@@ -219,7 +222,7 @@ public class DatabaseConnectionTest {
 
     @Test
     public void executeQueryForCollectionTest() throws SQLException, ReflectiveOperationException {
-        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseInformation databaseInformation = new DatabaseInformation(DRIVER_NAME, CONNECTION_URL, USERNAME, PASSWORD);
         DatabaseConnection connection = null;
         List<Person> persons;
         int expectedSize = 2;
@@ -241,7 +244,7 @@ public class DatabaseConnectionTest {
     }
 
     private void restoreDatabase() throws SQLException, ClassNotFoundException {
-        DatabaseInformation databaseInformation = new DatabaseInformation(driver, url, username, password);
+        DatabaseInformation databaseInformation = new DatabaseInformation(DRIVER_NAME, CONNECTION_URL, USERNAME, PASSWORD);
         DatabaseConnection connection = null;
 
         try {

@@ -5,7 +5,6 @@ import org.narwhal.annotation.Table;
 
 import java.sql.Date;
 
-
 /**
  * @author Miron Aseev
  */
@@ -14,9 +13,10 @@ public class Person {
 
     @Column(primaryKey = true)
     private Integer id;
-    private String name;
-    private Date birthday;
 
+    private String name;
+
+    private Date birthday;
 
     public Person() {
     }
