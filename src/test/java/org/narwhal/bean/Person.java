@@ -1,14 +1,14 @@
 package org.narwhal.bean;
 
 import org.narwhal.annotation.Column;
-import org.narwhal.annotation.Table;
+import org.narwhal.annotation.Entity;
 
 import java.sql.Date;
 
 /**
  * @author Miron Aseev
  */
-@Table
+@Entity
 public class Person {
 
     @Column(primaryKey = true)

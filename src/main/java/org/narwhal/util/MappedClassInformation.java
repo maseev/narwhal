@@ -1,7 +1,7 @@
 package org.narwhal.util;
 
 import org.narwhal.annotation.Column;
-import org.narwhal.annotation.Table;
+import org.narwhal.annotation.Entity;
 import org.narwhal.query.QueryCreator;
 
 import java.lang.reflect.Constructor;
@@ -160,8 +160,8 @@ public class MappedClassInformation<T> {
      * @throws IllegalArgumentException If class wasn't annotated by the Table annotation.
      * */
     private <T> String getTableName(Class<T> mappedClass) {
-        if (mappedClass.isAnnotationPresent(Table.class)) {
-            if (mappedClass.getAnnotation(Table.class).value().isEmpty()) {
+        if (mappedClass.isAnnotationPresent(Entity.class)) {
+            if (mappedClass.getAnnotation(Entity.class).value().isEmpty()) {
                 String className = mappedClass.getName();
                 int index = className.lastIndexOf('.') + 1;
 
@@ -171,12 +171,12 @@ public class MappedClassInformation<T> {
                     return className;
                 }
             } else {
-                return mappedClass.getAnnotation(Table.class).value();
+                return mappedClass.getAnnotation(Entity.class).value();
             }
         }
 
         throw new IllegalArgumentException("Class " + mappedClass.toString() +
-                " wasn't annotated by " + Table.class + " annotation");
+                " wasn't annotated by " + Entity.class + " annotation");
     }
 
     /**
