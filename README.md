@@ -34,7 +34,8 @@ Notice, that your entity class has to have a default constructor, so Narwhal wou
 ```java
 @Entity("PERSON")
 public class Person {
-	@Column(value = "PERSONID", primaryKey = true)
+    @Id
+	@Column(value = "PERSONID")
 	private int id;
 
 	@Column("NAME")
@@ -52,7 +53,7 @@ The example above could be rewritten as:
 ```java
 @Entity
 public class Person {
-	@Column(primaryKey = true)
+    @Id
 	private int id;
 
 	private String name;
