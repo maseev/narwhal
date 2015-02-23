@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  */
 @Target(value = ElementType.TYPE)
 @Retention(value = RetentionPolicy.RUNTIME)
-public @interface Table {
+public @interface Entity {
 
     /**
      * Returns a table name that maps
