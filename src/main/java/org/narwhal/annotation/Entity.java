@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The <code>Table</code> annotation is used to mark the particular
+ * The <code>Entity</code> annotation is used to mark the particular
  * class which maps on the database table.
  *
  * @author Miron Aseev

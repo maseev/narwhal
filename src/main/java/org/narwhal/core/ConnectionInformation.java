@@ -6,7 +6,7 @@ package org.narwhal.core;
  * 
  * @author Miron Aseev
  */
-public class DatabaseInformation {
+public class ConnectionInformation {
 
     private String driver;
 
@@ -24,7 +24,7 @@ public class DatabaseInformation {
      * @param username Database username. 
      * @param password Database password.
      * */
-    public DatabaseInformation(String driver, String url, String username, String password) {
+    public ConnectionInformation(String driver, String url, String username, String password) {
         this.driver = driver;
         this.url = url;
         this.username = username;
