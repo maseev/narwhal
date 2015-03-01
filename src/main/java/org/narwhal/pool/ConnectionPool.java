@@ -2,6 +2,7 @@ package org.narwhal.pool;
 
 import org.narwhal.core.ConnectionInformation;
 import org.narwhal.core.DatabaseConnection;
+import org.narwhal.core.Query;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -82,6 +83,16 @@ public class ConnectionPool {
         connectionsLock = new ReentrantLock();
         variableLock = new ReentrantLock();
         connections = createDatabaseConnections(size);
+    }
+
+    public <T> T query(Query<T> query) throws SQLException, ClassNotFoundException {
+        DatabaseConnection connection = getConnection();
+
+        try {
+            return query.perform(connection);
+        } finally {
+            returnConnection(connection);
+        }
     }
 
     /**
