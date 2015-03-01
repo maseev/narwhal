@@ -3,6 +3,7 @@ package org.narwhal.pool;
 import org.narwhal.core.ConnectionInformation;
 import org.narwhal.core.DatabaseConnection;
 import org.narwhal.core.Query;
+import org.narwhal.core.UpdateQuery;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -85,28 +86,48 @@ public class ConnectionPool {
         connections = createDatabaseConnections(size);
     }
 
-    public <T> T query(Query<T> query) throws SQLException, ClassNotFoundException {
-        DatabaseConnection connection = getConnection();
-
-        try {
-            return query.perform(connection);
-        } finally {
-            returnConnection(connection);
-        }
-    }
-
-    public <T> T queryInTransaction(Query<T> query) throws SQLException, ClassNotFoundException {
+    public <T> T query(Query<T> query, boolean runInTransaction) throws Exception {
         DatabaseConnection connection = getConnection();
 
         try {
             try {
-                connection.beginTransaction();
+                if (runInTransaction) {
+                    connection.beginTransaction();
+                }
+
                 T result = query.perform(connection);
                 connection.commit();
 
                 return result;
             } catch (SQLException ex) {
-                connection.rollback();
+                if (runInTransaction) {
+                    connection.rollback();
+                }
+
+                throw ex;
+            }
+        } finally {
+            returnConnection(connection);
+        }
+    }
+
+    public void update(UpdateQuery query, boolean runInTransaction) throws Exception {
+        DatabaseConnection connection = getConnection();
+
+        try {
+            try {
+                if (runInTransaction) {
+                    connection.beginTransaction();
+                }
+
+                query.perform(connection);
+                connection.commit();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                if (runInTransaction) {
+                    connection.rollback();
+                }
+
                 throw ex;
             }
         } finally {

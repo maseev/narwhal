@@ -135,15 +135,15 @@ public class DatabaseConnection {
      * Retrieves a particular entity from the database by using primary key.
      *
      * @param mappedClass A Class, whose annotated fields will be used for creating corresponding entity.
-     * @param primaryKey primary key that is used to find a particular row in the database.
+     * @param primaryKeys primary keys that are used to find a particular row in the database.
      * @throws SQLException If any database access problems happened.
      * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
-    public <T> T read(Class<T> mappedClass, Object primaryKey) throws SQLException, ReflectiveOperationException {
+    public <T> T read(Class<T> mappedClass, Object... primaryKeys) throws SQLException, ReflectiveOperationException {
         MappedClassInformation classInformation = getMappedClassInformation(mappedClass);
         String query = classInformation.getQuery(QueryType.READ);
 
-        return executeQuery(query, mappedClass, primaryKey);
+        return executeQuery(query, mappedClass, primaryKeys);
     }
 
     /**
@@ -158,6 +158,7 @@ public class DatabaseConnection {
         List<Object> parameters = new ArrayList<>(Arrays.asList(getParameters(object)));
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.UPDATE);
+        parameters.addAll(Arrays.asList(getPrimaryKeyMethodValues(object)));
 
         return executeUpdate(query, parameters.toArray());
     }
@@ -220,6 +221,7 @@ public class DatabaseConnection {
             }
         } catch (SQLException ex) {
             close();
+            throw ex;
         }
 
         return result;
@@ -276,6 +278,7 @@ public class DatabaseConnection {
             }
         } catch (SQLException ex) {
             close();
+            throw ex;
         }
 
         return result;
@@ -335,6 +338,7 @@ public class DatabaseConnection {
             }
         } catch (SQLException ex) {
             close();
+            throw ex;
         }
 
         return collection;
