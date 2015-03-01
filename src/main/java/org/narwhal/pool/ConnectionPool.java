@@ -1,8 +1,7 @@
 package org.narwhal.pool;
 
+import org.narwhal.core.ConnectionInformation;
 import org.narwhal.core.DatabaseConnection;
-import org.narwhal.core.DatabaseInformation;
-import org.narwhal.query.QueryCreator;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -29,16 +28,13 @@ public class ConnectionPool {
 
     private int acquireIncrement;
 
-    private DatabaseInformation databaseInformation;
+    private ConnectionInformation connectionInformation;
 
     private Lock connectionsLock;
 
     private Lock variableLock;
 
     private List<DatabaseConnection> connections;
-
-    private QueryCreator queryCreator;
-
 
     /**
      * Initializes a new instance of the ConnectionPool class.
@@ -47,14 +43,13 @@ public class ConnectionPool {
      * Default pool size is 5.
      * Acquire increment is 5.
      *
-     * @param databaseInformation instance of {@code DatabaseInformation} class that includes
+     * @param connectionInformation instance of {@code DatabaseInformation} class that includes
      *                            all the information for making connection to the database.
      * @throws SQLException If any database access problems happened.
      * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
-    public ConnectionPool(DatabaseInformation databaseInformation,
-                          QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
-        this(databaseInformation, DEFAULT_POOL_SIZE, DEFAULT_ACQUIRE_INCREMENT, queryCreator);
+    public ConnectionPool(ConnectionInformation connectionInformation) throws SQLException, ClassNotFoundException {
+        this(connectionInformation, DEFAULT_POOL_SIZE, DEFAULT_ACQUIRE_INCREMENT);
     }
 
     /**
@@ -63,31 +58,30 @@ public class ConnectionPool {
      * keeps all the information to make connection to the database.
      * Instance is also specified by the size and acquireIncrement variable.
      *
-     * @param databaseInformation instance of {@code DatabaseInformation} class that includes
+     * @param connectionInformation instance of {@code DatabaseInformation} class that includes
      *                            all the information for making connection to the database.
      * @param size the size of the pool.
      * @param acquireIncrement the acquire increment of the pool.
      * @throws SQLException If any database access problems happened.
      * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
-    public ConnectionPool(DatabaseInformation databaseInformation, int size,
-                          int acquireIncrement, QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
+    public ConnectionPool(ConnectionInformation connectionInformation, int size, int acquireIncrement)
+            throws SQLException, ClassNotFoundException {
         if (size < 1) {
-            throw new IllegalArgumentException("Argument value must be equal or greater than 1: " + size);
+            throw new IllegalArgumentException("Connection pool's size can't be less than 1");
         }
 
         if (acquireIncrement < 1) {
-            throw new IllegalArgumentException("Argument value must be equal or greater than 1: " + acquireIncrement);
+            throw new IllegalArgumentException("acquireIncrement's value can't be less than 1");
         }
 
-        this.databaseInformation = databaseInformation;
+        this.connectionInformation = connectionInformation;
         this.size = size;
         this.acquireIncrement = acquireIncrement;
-        this.queryCreator = queryCreator;
 
         connectionsLock = new ReentrantLock();
         variableLock = new ReentrantLock();
-        connections = createDatabaseConnections(size, queryCreator);
+        connections = createDatabaseConnections(size);
     }
 
     /**
@@ -104,7 +98,7 @@ public class ConnectionPool {
         connectionsLock.lock();
         try {
             if (connections.isEmpty()) {
-                connections.addAll(createDatabaseConnections(getAcquireIncrement(), queryCreator));
+                connections.addAll(createDatabaseConnections(getAcquireIncrement()));
 
                 variableLock.lock();
                 try {
@@ -181,7 +175,7 @@ public class ConnectionPool {
      * */
     public void setSize(int newSize) throws SQLException, ClassNotFoundException {
         if (newSize < 1) {
-            throw new IllegalArgumentException("Argument value must be equal or greater than 1: " + newSize);
+            throw new IllegalArgumentException("Size value must be a positive number");
         }
 
         connectionsLock.lock();
@@ -191,7 +185,7 @@ public class ConnectionPool {
                 int numberOfConnections = Math.abs(newSize - size);
 
                 if (newSize > size) {
-                    connections.addAll(createDatabaseConnections(numberOfConnections, queryCreator));
+                    connections.addAll(createDatabaseConnections(numberOfConnections));
                 } else {
                     while (numberOfConnections > 0 && !connections.isEmpty()) {
                         connections.remove(connections.size() - 1).close();
@@ -229,7 +223,7 @@ public class ConnectionPool {
      * */
     public void setAcquireIncrement(int newAcquireIncrement) {
         if (newAcquireIncrement < 0) {
-            throw new IllegalArgumentException("Argument value must be equal or greater than 1:" + newAcquireIncrement);
+            throw new IllegalArgumentException("newAcquireIncrement must be a positive number");
         }
 
         variableLock.lock();
@@ -248,13 +242,12 @@ public class ConnectionPool {
      * @throws SQLException If any database access problems happened.
      * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
      * */
-    private List<DatabaseConnection> createDatabaseConnections(int requiredSize,
-                                                               QueryCreator queryCreator) throws SQLException,
-                                                                                                 ClassNotFoundException {
+    private List<DatabaseConnection> createDatabaseConnections(int requiredSize) throws SQLException,
+                                                                                        ClassNotFoundException {
         List<DatabaseConnection> conn = new ArrayList<>(requiredSize);
 
         for (int i = 0; i < requiredSize; ++i) {
-            conn.add(new DatabaseConnection(databaseInformation, queryCreator));
+            conn.add(new DatabaseConnection(connectionInformation));
         }
 
         return conn;

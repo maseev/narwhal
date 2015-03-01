@@ -2,13 +2,13 @@ package org.narwhal.util;
 
 import org.narwhal.annotation.Column;
 import org.narwhal.annotation.Entity;
+import org.narwhal.annotation.Id;
 import org.narwhal.query.QueryCreator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The <code>MappedClassInformation</code> class keeps all the information about particular class.
@@ -19,17 +19,17 @@ public class MappedClassInformation<T> {
 
     private Constructor<T> constructor;
 
-    private Method[] setMethods;
+    private List<Method> setMethods;
 
-    private Method[] getMethods;
+    private List<Method> getMethods;
 
-    private String[] columns;
+    private List<String> columns;
 
-    private Method primaryKeyGetMethod;
+    private List<Method> primaryKeysMethods;
 
     private Map<QueryType, String> queries;
 
-    private String primaryColumnName;
+    private List<String> primaryKeys;
 
     /**
      * Initializes a new instance of the MappedClassInformation class.
@@ -40,13 +40,13 @@ public class MappedClassInformation<T> {
      * @throws NoSuchMethodException If there is no appropriate method to invoke
      * */
     public MappedClassInformation(Class<T> mappedClass, QueryCreator queryCreator) throws NoSuchMethodException {
-        Field[] fields = mappedClass.getDeclaredFields();
-        primaryKeyGetMethod = retrievePrimaryKeyMethod(mappedClass, fields);
-        primaryColumnName   = retrievePrimaryKeyColumnName(mappedClass, fields);
+        List<Field> fields = Arrays.asList(mappedClass.getDeclaredFields());
+        primaryKeysMethods = getPrimaryKeyMethods(mappedClass, fields);
+        primaryKeys = getPrimaryKeys(mappedClass, fields);
         constructor = mappedClass.getConstructor();
-        setMethods  = retrieveSetters(mappedClass, fields);
-        getMethods  = retrieveGetters(mappedClass, fields);
-        columns     = retrieveColumnsName(fields);
+        setMethods  = setters(mappedClass, fields);
+        getMethods  = getters(mappedClass, fields);
+        columns     = getColumns(fields);
         queries     = createQueries(mappedClass, queryCreator);
     }
 
@@ -55,7 +55,7 @@ public class MappedClassInformation<T> {
      *
      * @return List of set methods.
      * */
-    public Method[] getSetMethods() {
+    public List<Method> getSetMethods() {
         return setMethods;
     }
 
@@ -64,7 +64,7 @@ public class MappedClassInformation<T> {
      *
      * @return List of get methods.
      * */
-    public Method[] getGetMethods() {
+    public List<Method> getGetMethods() {
         return getMethods;
     }
 
@@ -73,8 +73,8 @@ public class MappedClassInformation<T> {
      *
      * @return Getter method for field of the class that maps to the primary key.
      * */
-    public Method getPrimaryKeyGetMethod() {
-        return primaryKeyGetMethod;
+    public List<Method> getPrimaryKeysMethods() {
+        return primaryKeysMethods;
     }
 
     /**
@@ -91,7 +91,7 @@ public class MappedClassInformation<T> {
      *
      * @return Columns of the database table.
      * */
-    public String[] getColumns() {
+    public List<String> getColumns() {
         return columns;
     }
 
@@ -110,15 +110,14 @@ public class MappedClassInformation<T> {
      * @param fields Fields of class that have been annotated by {@literal @}Column annotation.
      * @return Columns of the database table.
      * */
-    private String[] retrieveColumnsName(Field[] fields) {
-        String[] columns = new String[fields.length];
+    private List<String> getColumns(List<Field> fields) {
+        List<String> columns = new ArrayList<>(fields.size());
 
-        for (int i = 0; i < fields.length; ++i) {
-            if (fields[i].isAnnotationPresent(Column.class) &&
-                !fields[i].getAnnotation(Column.class).value().isEmpty()) {
-                columns[i] = fields[i].getAnnotation(Column.class).value();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(Column.class) && !field.getAnnotation(Column.class).value().isEmpty()) {
+                columns.add(field.getAnnotation(Column.class).value());
             } else {
-                columns[i] = fields[i].getName();
+                columns.add(field.getName());
             }
         }
 
@@ -133,22 +132,21 @@ public class MappedClassInformation<T> {
      * @throws IllegalArgumentException if field of the class wasn't annotated by the {@literal @}Column annotation
      *         with primaryKey = true.
      * */
-    private <T> String retrievePrimaryKeyColumnName(Class<T> mappedClass, Field[] fields) {
-        for (Field field : fields) {
-            if (field.isAnnotationPresent(Column.class) &&
-                field.getAnnotation(Column.class).primaryKey()) {
-                String columnName = field.getAnnotation(Column.class).value();
+    private List<String> getPrimaryKeys(Class<T> mappedClass, List<Field> fields) {
+        List<String> primaryKeys = new ArrayList<>();
 
-                if (columnName.isEmpty()) {
-                    return field.getName();
-                } else {
-                    return columnName;
-                }
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(Id.class)) {
+                primaryKeys.add(field.getName());
             }
         }
 
-        throw new IllegalArgumentException("Class " + mappedClass +
-                " doesn't have a field that was annotated by " + Column.class + " annotation with primaryKey = true");
+        if (primaryKeys.isEmpty()) {
+            String msg = "Class %s doesn't have a field that was annotated by %s annotation with primaryKey = true";
+            throw new IllegalArgumentException(String.format(msg, mappedClass, Column.class));
+        }
+
+        return primaryKeys;
     }
 
     /**
@@ -159,7 +157,7 @@ public class MappedClassInformation<T> {
      * @return string representation of the table name.
      * @throws IllegalArgumentException If class wasn't annotated by the Table annotation.
      * */
-    private <T> String getTableName(Class<T> mappedClass) {
+    private String getTableName(Class<T> mappedClass) {
         if (mappedClass.isAnnotationPresent(Entity.class)) {
             if (mappedClass.getAnnotation(Entity.class).value().isEmpty()) {
                 String className = mappedClass.getName();
@@ -175,8 +173,8 @@ public class MappedClassInformation<T> {
             }
         }
 
-        throw new IllegalArgumentException("Class " + mappedClass.toString() +
-                " wasn't annotated by " + Entity.class + " annotation");
+        String msg = "Class %s wasn't annotated by %s annotation";
+        throw new IllegalArgumentException(String.format(msg, mappedClass.toString(), Entity.class));
     }
 
     /**
@@ -197,7 +195,7 @@ public class MappedClassInformation<T> {
      *
      * @return String representation of the set method.
      * */
-    private String getSetMethodName(Field field) {
+    private String setter(Field field) {
         return getMethodName(field, "set");
     }
 
@@ -206,7 +204,7 @@ public class MappedClassInformation<T> {
      *
      * @return String representation of the set method.
      * */
-    private String getGetMethodName(Field field) {
+    private String getter(Field field) {
         Class type = field.getType();
 
         if (type.equals(boolean.class) || type.equals(Boolean.class)) {
@@ -225,12 +223,11 @@ public class MappedClassInformation<T> {
      * @return Set methods of the class.
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
-    private <T> Method[] retrieveSetters(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
-        Method[] methods = new Method[fields.length];
+    private List<Method> setters(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
+        List<Method> methods = new ArrayList<>(fields.size());
 
-        for (int i = 0; i < fields.length; ++i) {
-            String methodName = getSetMethodName(fields[i]);
-            methods[i] = mappedClass.getMethod(methodName, fields[i].getType());
+        for (Field field : fields) {
+            methods.add(mappedClass.getMethod(setter(field), field.getType()));
         }
 
         return methods;
@@ -245,11 +242,11 @@ public class MappedClassInformation<T> {
      * @return Set methods of the class.
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
-    private <T> Method[] retrieveGetters(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
-        Method[] methods = new Method[fields.length];
+    private List<Method> getters(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
+        List<Method> methods = new ArrayList<>(fields.size());
 
-        for (int i = 0; i < fields.length; ++i) {
-            methods[i] = mappedClass.getMethod(getGetMethodName(fields[i]));
+        for (Field field : fields) {
+            methods.add(mappedClass.getMethod(getter(field)));
         }
 
         return methods;
@@ -264,16 +261,21 @@ public class MappedClassInformation<T> {
      * @return Getter method for the field that maps to the primary key.
      * @throws NoSuchMethodException If there is no appropriate method to invoke.
      * */
-    private <T> Method retrievePrimaryKeyMethod(Class<T> mappedClass, Field[] fields) throws NoSuchMethodException {
+    private List<Method> getPrimaryKeyMethods(Class<T> mappedClass, List<Field> fields) throws NoSuchMethodException {
+        List<Method> primaryKeyMethods = new ArrayList<>();
+
         for (Field field : fields) {
-            if (field.isAnnotationPresent(Column.class) &&
-                field.getAnnotation(Column.class).primaryKey()) {
-                return mappedClass.getMethod(getGetMethodName(field));
+            if (field.isAnnotationPresent(Id.class)) {
+                primaryKeyMethods.add(mappedClass.getMethod(getter(field)));
             }
         }
 
-        throw new IllegalArgumentException("Class " + mappedClass +
-                " doesn't have a field that was annotated by " + Column.class + " annotation with primaryKey = true");
+        if (primaryKeyMethods.isEmpty()) {
+            String msg = "Class %s doesn't have a field that was annotated by %s annotation with primaryKey = true";
+            throw new IllegalArgumentException(String.format(msg, mappedClass, Id.class));
+        }
+
+        return primaryKeyMethods;
     }
 
     /**
@@ -282,14 +284,14 @@ public class MappedClassInformation<T> {
      * @param mappedClass A Class, which is used for retrieving information about constructors, set methods etc.
      * @return Map of QueryType and SQL query pairs.
      * */
-    private <T> Map<QueryType, String> createQueries(Class<T> mappedClass, QueryCreator creator) {
+    private Map<QueryType, String> createQueries(Class<T> mappedClass, QueryCreator creator) {
         String tableName = getTableName(mappedClass);
         Map<QueryType, String> queries = new HashMap<>();
 
-        queries.put(QueryType.CREATE, creator.makeInsertQuery(tableName, columns, primaryColumnName));
-        queries.put(QueryType.READ,   creator.makeSelectQuery(tableName, columns, primaryColumnName));
-        queries.put(QueryType.UPDATE, creator.makeUpdateQuery(tableName, columns, primaryColumnName));
-        queries.put(QueryType.DELETE, creator.makeDeleteQuery(tableName, primaryColumnName));
+        queries.put(QueryType.CREATE, creator.buildInsertQuery(tableName, columns));
+        queries.put(QueryType.READ,   creator.buildSelectQuery(tableName, columns, primaryKeys));
+        queries.put(QueryType.UPDATE, creator.buildUpdateQuery(tableName, columns, primaryKeys));
+        queries.put(QueryType.DELETE, creator.buildDeleteQuery(tableName, primaryKeys));
 
         return queries;
     }

@@ -1,6 +1,5 @@
 package org.narwhal.core;
 
-import org.narwhal.query.PostgreSQLQueryCreator;
 import org.narwhal.query.QueryCreator;
 import org.narwhal.util.MappedClassInformation;
 import org.narwhal.util.QueryType;
@@ -15,30 +14,27 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>
- * The <code>DatabaseConnection</code> represents connection to the relational database.
+ * The <code>DatabaseConnection</code> represents a connection to a database.
  * This class includes methods for retrieving the particular information from the relational databases.
- * It automatically maps retrieved result set to the particular entity (java class).
+ * It automatically maps retrieved result set to entity (java class).
  * DatabaseConnection class also manages all resources like database connection,
  * prepared statements, result sets etc.
- * It also provides basic logging using slf4j library for this case.
- * This class also supports basic transaction management and convenient methods for persist,
- * update, delete, read entity from the database.
+ * This class also provides basic transaction management and convenient methods for persist,
+ * update, delete, read entity from a database.
  * </p>
  *
  * <p>
- *     In order to use this class properly, all the fields of the mapped classes have to be annotated.
- *
  *     Here's an example how to use the annotation:
  *
  *     <p><code>
- *         {@literal @}Table("person")
+ *         {@literal @}Entity
  *         public class Person {
- *             {@literal @}Column(value = "person_id", primaryKey = true)
+ *             {@literal @}Id
  *             private int id;
- *             {@literal @}Column("name)
+ *
  *             private String name;
  *
- *             // getter and setter methods.
+ *             // other stuff
  *         }
  *     </code></p>
  *
@@ -58,7 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * </p>
  *
  * @author Miron Aseev
- * @see DatabaseInformation
+ * @see ConnectionInformation
  */
 public class DatabaseConnection {
 
@@ -71,15 +67,14 @@ public class DatabaseConnection {
     /**
      * Initializes a new instance of the DatabaseConnection class and trying to connect to the database.
      *
-     * @param databaseInformation instance of {@code DatabaseInformation} class that includes
+     * @param connectionInformation instance of {@code DatabaseInformation} class that includes
      *                            all the information for making connection to the database.
      * @throws SQLException If any database access problems happened.
      * @throws ClassNotFoundException IF there's any error with finding a jdbc driver class.
      * */
-    public DatabaseConnection(DatabaseInformation databaseInformation,
-                              QueryCreator queryCreator) throws SQLException, ClassNotFoundException {
-        connection = getConnection(databaseInformation);
-        this.queryCreator = queryCreator;
+    public DatabaseConnection(ConnectionInformation connectionInformation) throws SQLException, ClassNotFoundException {
+        connection = getConnection(connectionInformation);
+        queryCreator = new QueryCreator();
     }
 
     /**
@@ -133,11 +128,7 @@ public class DatabaseConnection {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.CREATE);
 
-        if (queryCreator.getClass() == PostgreSQLQueryCreator.class) {
-            return executeUpdate(query, getParametersWithoutPrimaryKey(object));
-        } else {
-            return executeUpdate(query, getParameters(object));
-        }
+        return executeUpdate(query, getParameters(object));
     }
 
     /**
@@ -164,10 +155,7 @@ public class DatabaseConnection {
      * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
     public int update(Object object) throws SQLException, ReflectiveOperationException {
-        List<Object> parameters = new ArrayList<>();
-        parameters.addAll(Arrays.asList(getParameters(object)));
-        parameters.add(getPrimaryKeyMethodValue(object));
-
+        List<Object> parameters = new ArrayList<>(Arrays.asList(getParameters(object)));
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.UPDATE);
 
@@ -185,9 +173,9 @@ public class DatabaseConnection {
     public int delete(Object object) throws SQLException, ReflectiveOperationException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
         String query = classInformation.getQuery(QueryType.DELETE);
-        Object primaryKey = getPrimaryKeyMethodValue(object);
+        Object[] primaryKeysValues = getPrimaryKeyMethodValues(object);
 
-        return executeUpdate(query, primaryKey);
+        return executeUpdate(query, primaryKeysValues);
     }
 
     /**
@@ -381,33 +369,9 @@ public class DatabaseConnection {
     @SuppressWarnings("unchecked")
     private Object[] getParameters(Object object) throws ReflectiveOperationException {
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
-        Method[] getMethods = classInformation.getGetMethods();
+        List<Method> getMethods = classInformation.getGetMethods();
 
         return retrieveParameters(object, getMethods);
-    }
-
-    /**
-     * Returns an array which contains a values of the class's instance fields.
-     * Array doesn't include value for the field which was marked as a primary key.
-     *
-     * @return Array which contains a values of the class's instance fields.
-     *         Resulting array doesn't have value of the field which was marked by annotation as a primary key {@literal Column}(primaryKey = true).
-     * @param object Instance of a particular class from which the parameters will be extracted.
-     * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
-     * */
-    private Object[] getParametersWithoutPrimaryKey(Object object) throws ReflectiveOperationException{
-        MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
-        Method[] getMethods = classInformation.getGetMethods();
-        Method[] filteredGetters = new Method[getMethods.length - 1];
-        Method primaryKeyGetter = classInformation.getPrimaryKeyGetMethod();
-
-        for (int i = 0, k = 0; i < getMethods.length; ++i) {
-            if (!primaryKeyGetter.equals(getMethods[i])) {
-                filteredGetters[k++] = getMethods[i];
-            }
-        }
-        
-        return retrieveParameters(object, filteredGetters);
     }
 
     /**
@@ -418,11 +382,11 @@ public class DatabaseConnection {
      * @param getters Array which contains all getters of a particular class.
      * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
-    private Object[] retrieveParameters(Object object, Method[] getters) throws ReflectiveOperationException {
-        Object[] parameters = new Object[getters.length];
+    private Object[] retrieveParameters(Object object, List<Method> getters) throws ReflectiveOperationException {
+        Object[] parameters = new Object[getters.size()];
 
-        for (int i = 0; i < getters.length; ++i) {
-            parameters[i] = getters[i].invoke(object);
+        for (int i = 0; i < getters.size(); ++i) {
+            parameters[i] = getters.get(i).invoke(object);
         }
 
         return parameters;
@@ -507,33 +471,38 @@ public class DatabaseConnection {
     }
 
     /**
-     * Returns field's value of the particular object that was annotated by {@literal Column}
-     * annotation with primaryKey = true by invoking getter method.
+     * Returns field's value of the particular object that was annotated by {@literal Id}
      *
      * @param object Entity class which method is used to be invoked.
      * @throws ReflectiveOperationException If there's any problem which has connection with Reflection API.
      * */
-    private Object getPrimaryKeyMethodValue(Object object) throws ReflectiveOperationException{
+    private Object[] getPrimaryKeyMethodValues(Object object) throws ReflectiveOperationException{
         MappedClassInformation classInformation = getMappedClassInformation(object.getClass());
+        List<Method> primaryKeysMethods = classInformation.getPrimaryKeysMethods();
+        List<Object> primaryKeysValues = new ArrayList<>(primaryKeysMethods.size());
 
-        return classInformation.getPrimaryKeyGetMethod().invoke(object);
+        for (Method method : primaryKeysMethods) {
+            primaryKeysValues.add(method.invoke(object));
+        }
+
+        return primaryKeysValues.toArray();
     }
 
     /**
      * Registers JDBC driver and trying to connect to the database.
      *
-     * @param databaseInformation Instance of the DatabaseInformation class that keeps all the information
+     * @param connectionInformation Instance of the DatabaseInformation class that keeps all the information
      *                            about database connection like database driver's name, url, username and password.
      * @return A new Connection object associated with particular database.
      * @throws SQLException If any database access problems happened.
      * @throws ClassNotFoundException If there's any problem with finding a JDBC driver class.
      * */
-    private Connection getConnection(DatabaseInformation databaseInformation) throws SQLException, ClassNotFoundException {
-        String url = databaseInformation.getUrl();
-        String username = databaseInformation.getUsername();
-        String password = databaseInformation.getPassword();
+    private Connection getConnection(ConnectionInformation connectionInformation) throws SQLException, ClassNotFoundException {
+        String url = connectionInformation.getUrl();
+        String username = connectionInformation.getUsername();
+        String password = connectionInformation.getPassword();
 
-        Class.forName(databaseInformation.getDriver());
+        Class.forName(connectionInformation.getDriver());
         connection = DriverManager.getConnection(url, username, password);
 
         return connection;
@@ -572,13 +541,13 @@ public class DatabaseConnection {
      private <T> T createEntitySupporter(ResultSet resultSet,
                                          MappedClassInformation<T> classInformation) throws SQLException,
                                                                                             ReflectiveOperationException {
-        Method[] setMethods = classInformation.getSetMethods();
-        String[] columns = classInformation.getColumns();
+        List<Method> setMethods = classInformation.getSetMethods();
+        List<String> columns = classInformation.getColumns();
         T result = classInformation.getConstructor().newInstance();
 
-        for (int i = 0; i < columns.length; ++i) {
-            Object data = resultSet.getObject(columns[i]);
-            setMethods[i].invoke(result, data);
+        for (int i = 0; i < columns.size(); ++i) {
+            Object data = resultSet.getObject(columns.get(i));
+            setMethods.get(i).invoke(result, data);
         }
 
         return result;
