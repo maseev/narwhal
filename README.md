@@ -76,20 +76,18 @@ ConnectionInformation connectionInformation(driver, url, username, password);
 DatabaseConnection connection = new DatabaseConnection(connectionInformation);
 ```
 
-You can also use a connection pool in order to create a necessary number of database connections:
+You can also use a connection pool in order to create a necessary number of database connections as well as use
+a very handy query method which retrieves a database connection from the connection pool and performs a query against the database:
 	
 ```java
 ConnectionPool connectionPool = new ConnectionPool(connectionInformation);
 
-DatabaseConnection connection = connectionPool.getConnection();
-	
-// using connection
-
-connectionPool.returnConnection(connection);
-
-// in the end
-	
-connectionPool.close();
+connectionPool.query(new Query<List<Person>>() {
+    @Override
+    public List<Person> perform(DatabaseConnection connection) {
+        return connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
+    }
+});
 ```
 
 Performing a query to retrieve an entity:
