@@ -2,6 +2,7 @@ package org.narwhal.bean;
 
 import org.narwhal.annotation.Column;
 import org.narwhal.annotation.Entity;
+import org.narwhal.annotation.Id;
 
 import java.sql.Date;
 
@@ -11,7 +12,8 @@ import java.sql.Date;
 @Entity
 public class Person {
 
-    @Column(primaryKey = true)
+    @Id
+    @Column
     private Integer id;
 
     private String name;
