@@ -95,6 +95,25 @@ public class ConnectionPool {
         }
     }
 
+    public <T> T queryInTransaction(Query<T> query) throws SQLException, ClassNotFoundException {
+        DatabaseConnection connection = getConnection();
+
+        try {
+            try {
+                connection.beginTransaction();
+                T result = query.perform(connection);
+                connection.commit();
+
+                return result;
+            } catch (SQLException ex) {
+                connection.rollback();
+                throw ex;
+            }
+        } finally {
+            returnConnection(connection);
+        }
+    }
+
     /**
      * Returns DatabaseConnection object from the pool.
      * This method removes connection from the pool collection.
