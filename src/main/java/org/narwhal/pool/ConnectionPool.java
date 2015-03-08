@@ -86,7 +86,7 @@ public class ConnectionPool {
         connections = createDatabaseConnections(size);
     }
 
-    public <T> T query(Query<T> query, boolean runInTransaction) throws Exception {
+    public <T> T query(Query<T> selectQuery, boolean runInTransaction) throws Exception {
         DatabaseConnection connection = getConnection();
 
         try {
@@ -95,8 +95,11 @@ public class ConnectionPool {
                     connection.beginTransaction();
                 }
 
-                T result = query.perform(connection);
-                connection.commit();
+                T result = selectQuery.perform(connection);
+
+                if (runInTransaction) {
+                    connection.commit();
+                }
 
                 return result;
             } catch (SQLException ex) {
@@ -121,9 +124,11 @@ public class ConnectionPool {
                 }
 
                 query.perform(connection);
-                connection.commit();
+
+                if (runInTransaction) {
+                    connection.commit();
+                }
             } catch (SQLException ex) {
-                ex.printStackTrace();
                 if (runInTransaction) {
                     connection.rollback();
                 }
@@ -132,54 +137,6 @@ public class ConnectionPool {
             }
         } finally {
             returnConnection(connection);
-        }
-    }
-
-    /**
-     * Returns DatabaseConnection object from the pool.
-     * This method removes connection from the pool collection.
-     * After working with DatabaseConnection object you should
-     * return connection to the pool by invoking returnConnection() method.
-     *
-     * @return DatabaseConnection object.
-     * @throws SQLException If any database access problems happened.
-     * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
-     * */
-    public DatabaseConnection getConnection() throws SQLException, ClassNotFoundException {
-        connectionsLock.lock();
-        try {
-            if (connections.isEmpty()) {
-                connections.addAll(createDatabaseConnections(getAcquireIncrement()));
-
-                variableLock.lock();
-                try {
-                    size += acquireIncrement;
-                } finally {
-                    variableLock.unlock();
-                }
-            }
-
-            return connections.remove(connections.size() - 1);
-        } finally {
-            connectionsLock.unlock();
-        }
-    }
-
-    /**
-     * Returns connection to the pool.
-     *
-     * @param connection Database connection which is going to be added to the pool.
-     * */
-    public void returnConnection(DatabaseConnection connection) {
-        connectionsLock.lock();
-        try {
-            if (connections.size() == getSize()) {
-                throw new IllegalArgumentException("Pool is full");
-            }
-
-            connections.add(connection);
-        } finally {
-            connectionsLock.unlock();
         }
     }
 
@@ -282,6 +239,54 @@ public class ConnectionPool {
             this.acquireIncrement = newAcquireIncrement;
         } finally {
             variableLock.unlock();
+        }
+    }
+
+    /**
+     * Returns DatabaseConnection object from the pool.
+     * This method removes connection from the pool collection.
+     * After working with DatabaseConnection object you should
+     * return connection to the pool by invoking returnConnection() method.
+     *
+     * @return DatabaseConnection object.
+     * @throws SQLException If any database access problems happened.
+     * @throws ClassNotFoundException If there's any problem with finding a jdbc driver class.
+     * */
+    private DatabaseConnection getConnection() throws SQLException, ClassNotFoundException {
+        connectionsLock.lock();
+        try {
+            if (connections.isEmpty()) {
+                connections.addAll(createDatabaseConnections(getAcquireIncrement()));
+
+                variableLock.lock();
+                try {
+                    size += acquireIncrement;
+                } finally {
+                    variableLock.unlock();
+                }
+            }
+
+            return connections.remove(connections.size() - 1);
+        } finally {
+            connectionsLock.unlock();
+        }
+    }
+
+    /**
+     * Returns connection to the pool.
+     *
+     * @param connection Database connection which is going to be added to the pool.
+     * */
+    private void returnConnection(DatabaseConnection connection) {
+        connectionsLock.lock();
+        try {
+            if (connections.size() == getSize()) {
+                throw new IllegalArgumentException("Pool is full");
+            }
+
+            connections.add(connection);
+        } finally {
+            connectionsLock.unlock();
         }
     }
 
