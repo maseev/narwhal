@@ -82,7 +82,7 @@ a very handy query method which retrieves a database connection from the connect
 ```java
 ConnectionPool connectionPool = new ConnectionPool(connectionInformation);
 
-connectionPool.query(new Query<List<Person>>() {
+List<Person> people = connectionPool.query(new Query<List<Person>>() {
     @Override
     public List<Person> perform(DatabaseConnection connection) {
         return connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
