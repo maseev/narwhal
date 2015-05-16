@@ -45,7 +45,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>Here are some examples how DatabaseConnection can be used:</p>
 
  * <p><code>
- * DatabaseConnection connection = new DatabaseConnection(new DatabaseInformation(driver, url, username, password));
+ * Connection connection = // acquire a java.sql.Connection instance
+ * DatabaseConnection connection = new DatabaseConnection(connection);
  *
  * connection.executeUpdate("UPDATE person SET name = ? WHERE id = ?", name, id);
  *
@@ -54,7 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * </p>
  *
  * @author Miron Aseev
- * @see ConnectionInformation
  */
 public class DatabaseConnection {
 
@@ -66,14 +66,9 @@ public class DatabaseConnection {
 
     /**
      * Initializes a new instance of the DatabaseConnection class and trying to connect to the database.
-     *
-     * @param connectionInformation instance of {@code DatabaseInformation} class that includes
-     *                            all the information for making connection to the database.
-     * @throws SQLException If any database access problems happened.
-     * @throws ClassNotFoundException IF there's any error with finding a jdbc driver class.
      * */
-    public DatabaseConnection(ConnectionInformation connectionInformation) throws SQLException, ClassNotFoundException {
-        connection = getConnection(connectionInformation);
+    public DatabaseConnection(Connection connection) {
+        this.connection = connection;
         queryCreator = new QueryCreator();
     }
 
@@ -490,26 +485,6 @@ public class DatabaseConnection {
         }
 
         return primaryKeysValues.toArray();
-    }
-
-    /**
-     * Registers JDBC driver and trying to connect to the database.
-     *
-     * @param connectionInformation Instance of the DatabaseInformation class that keeps all the information
-     *                            about database connection like database driver's name, url, username and password.
-     * @return A new Connection object associated with particular database.
-     * @throws SQLException If any database access problems happened.
-     * @throws ClassNotFoundException If there's any problem with finding a JDBC driver class.
-     * */
-    private Connection getConnection(ConnectionInformation connectionInformation) throws SQLException, ClassNotFoundException {
-        String url = connectionInformation.getUrl();
-        String username = connectionInformation.getUsername();
-        String password = connectionInformation.getPassword();
-
-        Class.forName(connectionInformation.getDriver());
-        connection = DriverManager.getConnection(url, username, password);
-
-        return connection;
     }
 
     /**
