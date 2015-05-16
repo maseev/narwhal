@@ -29,7 +29,7 @@ Here are couple of reasons why you would like to write the following class as it
 First - fields of the mapped class and columns in the database table might have different names, so it's quite obvious that you have to use
 annotations in order to match your class fields with table columns.
 Second - you are probably in a very verbose mood :).
-Notice, that your entity class has to have a default constructor, so Narwhal would be able to create an instance of that class.
+Notice, that your entity class must have a default constructor, so Narwhal would be able to create instances of that class.
 
 ```java
 @Entity("PERSON")
@@ -62,69 +62,73 @@ public class Person {
 }
 ```
 
-Notice, in the example above you don't even have to to specify any getters and setters for class fields.
-Narwhal uses reflection API in order to get or set some class's fields value if there's no getter or setter.
+Notice, in the example above you don't even have to to create any getters and setters for class fields.
+Narwhal uses reflection API in order to get and set class's fields values if there's no getter or setter.
 	
 The following example illustrates creating a connection to PostgreSQL database:
 
 ```java
-String driver   = "org.postgresql.Driver";
-String url      = "jdbc:postgresql://localhost:5432/test?charSet=UTF8";
-String username = "test";
-String password = "test";
-ConnectionInformation connectionInformation(driver, url, username, password);
-DatabaseConnection connection = new DatabaseConnection(connectionInformation);
+HikariDataSource dataSource = new HikariDataSource();
+dataSource.setJdbcUrl("jdbc:postgresql://localhost:5432/test?charSet=UTF8");
+dataSource.setDriverClassName("org.postgresql.Driver");
+dataSource.setUsername("test");
+dataSource.setPassword("test");
+
+QueryTemplate queryTemplate = new QueryTemplate(dataSource);
 ```
 
-You can also use a connection pool in order to create a necessary number of database connections as well as use
-a very handy query method which retrieves a database connection from the connection pool and performs a query against the database:
-	
-```java
-ConnectionPool connectionPool = new ConnectionPool(connectionInformation);
+Performing a query to retrieve a single entity:
 
-List<Person> people = connectionPool.query(new Query<List<Person>>() {
+```java
+Person person = queryTemplate.query(new Query<Person>() {
+	@Override
+	public Person perform(DatabaseConnection connection) throws Exception {
+		return connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, 1);
+	}
+}, false);
+```	
+
+Performing a query to retrieve a list of entities:
+
+```java
+List<Person> people = queryTemplate.query(new Query<List<Person>>() {
     @Override
     public List<Person> perform(DatabaseConnection connection) {
         return connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
     }
-});
-```
-
-Performing a query to retrieve an entity:
-
-```java
-Person person = connection.executeQuery("SELECT id, name FROM person WHERE id = ?", Person.class, 1);
-```	
-
-Performing a query to retrieve a list of entities which satisfies the query:
-
-```java
-List<Person> persons = connection.executeQueryForCollection("SELECT * FROM person", Person.class);
+}, false);
 ```	
 		
 Here is an example of using insert, update and delete queries:
 
 ```java
-connection.executeUpdate("INSERT INTO person (id, name, birthday) VALUES (?, ?, ?)", null, "John", new Date());
-connection.executeUpdate("UPDATE person SET id = 1 WHERE name = ?", "John");
-connection.executeUpdate("DELETE FROM person WHERE id > ?", 0);
+queryTemplate.update(new UpdateQuery() {
+	@Override
+	public int perform(DatabaseConnection connection) throws Exception {
+		int affectedRows = 0;
+
+		affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 5, "Test", new Date(new java.util.Date().getTime()));
+		affectedRows += connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "TestTest", "Test");
+		affectedRows += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
+
+		return affectedRows;
+	}
+}, true);
 ```
 
-The following example illustrates a process of using convenient methods such as ``` persist ```, ``` update ``` and ``` delete ``` as well as basic transaction management:
+The following example illustrates a process of using convenient methods such as ``` persist ```, ``` update ``` and ``` delete ```:
 
 ```java
-try {
-	connection.beginTransaction();
-	
-	connection.persist(new Person(1, "John");
-	connection.update(person1);
-	connection.delete(person2);
-	
-	connection.commit();
-	
-	Person person = connection.read(Person.class, 1);
-} catch (SQLException ex) {
-	ex.printStackTrace();
-	connection.rollback();
-}
+queryTemplate.update(new UpdateQuery() {
+	@Override
+	public int perform(DatabaseConnection connection) throws Exception {
+		int affectedRows = 0;
+
+		affectedRows += connection.persist(new Person(1, "John");
+		affectedRows += connection.update(person1);
+		affectedRows += connection.delete(person2);
+
+		return affectedRows;
+	}
+}, true);
 ```
