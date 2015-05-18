@@ -1,6 +1,4 @@
 package org.narwhal.core;
 
-public interface UpdateQuery {
-
-    int perform(DatabaseConnection connection) throws Exception;
+public interface UpdateQuery extends Query<Integer> {
 }

@@ -32,7 +32,7 @@ public class QueryTemplate {
         this.dataSource = dataSource;
     }
 
-    public <T> T query(Query<T> selectQuery, boolean runInTransaction) throws Exception {
+    public <T> T run(Query<T> query, boolean runInTransaction) throws Exception {
         DatabaseConnection connection = getConnection();
 
         try {
@@ -41,35 +41,7 @@ public class QueryTemplate {
                     connection.beginTransaction();
                 }
 
-                T result = selectQuery.perform(connection);
-
-                if (runInTransaction) {
-                    connection.commit();
-                }
-
-                return result;
-            } catch (SQLException ex) {
-                if (runInTransaction) {
-                    connection.rollback();
-                }
-
-                throw ex;
-            }
-        } finally {
-            connection.close();
-        }
-    }
-
-    public int update(UpdateQuery query, boolean runInTransaction) throws Exception {
-        DatabaseConnection connection = getConnection();
-
-        try {
-            try {
-                if (runInTransaction) {
-                    connection.beginTransaction();
-                }
-
-                int result = query.perform(connection);
+                T result = query.perform(connection);
 
                 if (runInTransaction) {
                     connection.commit();

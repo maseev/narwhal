@@ -26,9 +26,9 @@ public class QueryTemplateTest {
 
         queryTemplate = new QueryTemplate(dataSource);
 
-        queryTemplate.update(new UpdateQuery() {
+        queryTemplate.run(new UpdateQuery() {
             @Override
-            public int perform(DatabaseConnection connection) throws Exception {
+            public Integer perform(DatabaseConnection connection) throws Exception {
                 return connection.executeUpdate("CREATE TABLE Person(id INT PRIMARY KEY, name VARCHAR, birthday DATE);");
             }
         }, true);
@@ -36,9 +36,9 @@ public class QueryTemplateTest {
 
     @Before
     public void populate() throws Exception {
-        queryTemplate.update(new UpdateQuery() {
+        queryTemplate.run(new UpdateQuery() {
             @Override
-            public int perform(DatabaseConnection connection) throws Exception {
+            public Integer perform(DatabaseConnection connection) throws Exception {
                 int affectedRows = 0;
 
                 affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 1, "John", johnBirthday);
@@ -53,9 +53,9 @@ public class QueryTemplateTest {
 
     @After
     public void clear() throws Exception {
-        queryTemplate.update(new UpdateQuery() {
+        queryTemplate.run(new UpdateQuery() {
             @Override
-            public int perform(DatabaseConnection connection) throws Exception {
+            public Integer perform(DatabaseConnection connection) throws Exception {
                 return connection.executeUpdate("DELETE FROM Person");
             }
         }, true);
@@ -64,9 +64,9 @@ public class QueryTemplateTest {
     @Test
     public void transactionMethodsTest() throws Exception {
         int expectedRowAffected = 3;
-        int result = queryTemplate.update(new UpdateQuery() {
+        int result = queryTemplate.run(new UpdateQuery() {
             @Override
-            public int perform(DatabaseConnection connection) throws Exception {
+            public Integer perform(DatabaseConnection connection) throws Exception {
                 int affectedRows = 0;
 
                 affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 5, "Test", new Date(new java.util.Date().getTime()));
@@ -84,9 +84,9 @@ public class QueryTemplateTest {
     public void createTest() throws Exception {
         final Person person = new Person(3, "TestPerson", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
-        int result = queryTemplate.update(new UpdateQuery() {
+        int result = queryTemplate.run(new UpdateQuery() {
             @Override
-            public int perform(DatabaseConnection connection) throws Exception {
+            public Integer perform(DatabaseConnection connection) throws Exception {
                 return connection.persist(person);
             }
         }, true);
@@ -96,7 +96,7 @@ public class QueryTemplateTest {
 
     @Test
     public void readTest() throws Exception {
-        Person person = queryTemplate.query(new Query<Person>() {
+        Person person = queryTemplate.run(new Query<Person>() {
             @Override
             public Person perform(DatabaseConnection connection) throws Exception {
                 return connection.read(Person.class, 1);
@@ -111,14 +111,14 @@ public class QueryTemplateTest {
     public void updateTest() throws Exception {
         final Person person = new Person(1, "John Doe", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
-        int result = queryTemplate.update(new UpdateQuery() {
+        int result = queryTemplate.run(new UpdateQuery() {
             @Override
-            public int perform(DatabaseConnection connection) throws Exception {
+            public Integer perform(DatabaseConnection connection) throws Exception {
                 return connection.update(person);
             }
         }, true);
 
-        Person anotherPerson = queryTemplate.query(new Query<Person>() {
+        Person anotherPerson = queryTemplate.run(new Query<Person>() {
             @Override
             public Person perform(DatabaseConnection connection) throws Exception {
                 return connection.read(Person.class, 1);
@@ -133,9 +133,9 @@ public class QueryTemplateTest {
     public void deleteTest() throws Exception {
         final Person person = new Person(1, "John", new Date(new java.util.Date().getTime()));
         int expectedRowAffected = 1;
-        int result = queryTemplate.update(new UpdateQuery() {
+        int result = queryTemplate.run(new UpdateQuery() {
             @Override
-            public int perform(DatabaseConnection connection) throws Exception {
+            public Integer perform(DatabaseConnection connection) throws Exception {
                 return connection.delete(person);
             }
         }, true);
@@ -147,9 +147,9 @@ public class QueryTemplateTest {
     public void executeUpdateTest() throws Exception {
         final int doeId = 2;
         int expectedRowAffected = 1;
-        int result = queryTemplate.update(new UpdateQuery() {
+        int result = queryTemplate.run(new UpdateQuery() {
             @Override
-            public int perform(DatabaseConnection connection) throws Exception {
+            public Integer perform(DatabaseConnection connection) throws Exception {
                 return connection.executeUpdate("UPDATE Person SET name = ? WHERE id = ?", "FunnyName", doeId);
             }
         }, true);
@@ -161,7 +161,7 @@ public class QueryTemplateTest {
     public void executeQueryTest() throws Exception {
         String expectedName = "John";
         final int joeId = 1;
-        Person person = queryTemplate.query(new Query<Person>() {
+        Person person = queryTemplate.run(new Query<Person>() {
             @Override
             public Person perform(DatabaseConnection connection) throws Exception {
                 return connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, joeId);
@@ -175,7 +175,7 @@ public class QueryTemplateTest {
     @Test
     public void executeQueryForCollectionTest() throws Exception {
         int expectedSize = 2;
-        List<Person> persons = queryTemplate.query(new Query<List<Person>>() {
+        List<Person> persons = queryTemplate.run(new Query<List<Person>>() {
             @Override
             public List<Person> perform(DatabaseConnection connection) throws Exception {
                 return connection.executeQueryForCollection("SELECT * FROM Person", Person.class);

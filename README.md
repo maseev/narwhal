@@ -80,7 +80,7 @@ QueryTemplate queryTemplate = new QueryTemplate(dataSource);
 Performing a query to retrieve a single entity:
 
 ```java
-Person person = queryTemplate.query(new Query<Person>() {
+Person person = queryTemplate.run(new Query<Person>() {
 	@Override
 	public Person perform(DatabaseConnection connection) throws Exception {
 		return connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, 1);
@@ -91,7 +91,7 @@ Person person = queryTemplate.query(new Query<Person>() {
 Performing a query to retrieve a list of entities:
 
 ```java
-List<Person> people = queryTemplate.query(new Query<List<Person>>() {
+List<Person> people = queryTemplate.run(new Query<List<Person>>() {
     @Override
     public List<Person> perform(DatabaseConnection connection) {
         return connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
@@ -102,9 +102,9 @@ List<Person> people = queryTemplate.query(new Query<List<Person>>() {
 Here is an example of using insert, update and delete queries:
 
 ```java
-queryTemplate.update(new UpdateQuery() {
+queryTemplate.run(new UpdateQuery() {
 	@Override
-	public int perform(DatabaseConnection connection) throws Exception {
+	public Integer perform(DatabaseConnection connection) throws Exception {
 		int affectedRows = 0;
 
 		affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 5, "Test", new Date(new java.util.Date().getTime()));
@@ -119,9 +119,9 @@ queryTemplate.update(new UpdateQuery() {
 The following example illustrates a process of using convenient methods such as ``` persist ```, ``` update ``` and ``` delete ```:
 
 ```java
-queryTemplate.update(new UpdateQuery() {
+queryTemplate.run(new UpdateQuery() {
 	@Override
-	public int perform(DatabaseConnection connection) throws Exception {
+	public Integer perform(DatabaseConnection connection) throws Exception {
 		int affectedRows = 0;
 
 		affectedRows += connection.persist(new Person(1, "John");
