@@ -4,4 +4,4 @@ jdk:
   - oraclejdk8
   - openjdk7
 after_success:
-  - coveralls
+  - mvn clean cobertura:cobertura coveralls:report
