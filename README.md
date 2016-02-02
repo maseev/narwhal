@@ -1,5 +1,7 @@
 Narwhal
 =======
+[![Build Status](https://travis-ci.org/maseev/narwhal.svg?branch=master)](https://travis-ci.org/maseev/narwhal)
+[![Coverage Status](https://coveralls.io/repos/github/maseev/narwhal/badge.svg?branch=master)](https://coveralls.io/github/maseev/narwhal?branch=master)
 
 JDBC wrapper library
 -----------------------------
