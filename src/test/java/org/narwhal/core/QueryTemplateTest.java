@@ -1,8 +1,15 @@
 package org.narwhal.core;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.*;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.narwhal.bean.Person;
+import org.narwhal.bean.NotEntityPerson;
+import org.narwhal.bean.PersonWithoutPrimaryKey;
 
 import java.sql.Date;
 import java.util.GregorianCalendar;
@@ -29,7 +36,7 @@ public class QueryTemplateTest {
         queryTemplate.run(new UpdateQuery() {
             @Override
             public Integer perform(DatabaseConnection connection) throws Exception {
-                return connection.executeUpdate("CREATE TABLE Person(id INT PRIMARY KEY, name VARCHAR, birthday DATE);");
+                return connection.executeUpdate("CREATE TABLE Person(id INT PRIMARY KEY, name VARCHAR, birthday DATE, employed BOOLEAN);");
             }
         }, true);
     }
@@ -41,8 +48,8 @@ public class QueryTemplateTest {
             public Integer perform(DatabaseConnection connection) throws Exception {
                 int affectedRows = 0;
 
-                affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 1, "John", johnBirthday);
-                affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 2, "Doe", doeBirthday);
+                affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday, employed) VALUES (?, ?, ?, ?)", 1, "John", johnBirthday, true);
+                affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday, employed) VALUES (?, ?, ?, ?)", 2, "Doe", doeBirthday, false);
 
                 return affectedRows;
             }
@@ -69,7 +76,7 @@ public class QueryTemplateTest {
             public Integer perform(DatabaseConnection connection) throws Exception {
                 int affectedRows = 0;
 
-                affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 5, "Test", new Date(new java.util.Date().getTime()));
+                affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday, employed) VALUES (?, ?, ?, ?)", 5, "Test", new Date(new java.util.Date().getTime()), true);
                 affectedRows += connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "TestTest", "Test");
                 affectedRows += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
 
@@ -82,7 +89,7 @@ public class QueryTemplateTest {
 
     @Test
     public void createTest() throws Exception {
-        final Person person = new Person(3, "TestPerson", new Date(new java.util.Date().getTime()));
+        final Person person = new Person(3, "TestPerson", new Date(new java.util.Date().getTime()), true);
         int expectedRowAffected = 1;
         int result = queryTemplate.run(new UpdateQuery() {
             @Override
@@ -109,7 +116,7 @@ public class QueryTemplateTest {
 
     @Test
     public void updateTest() throws Exception {
-        final Person person = new Person(1, "John Doe", new Date(new java.util.Date().getTime()));
+        final Person person = new Person(1, "John Doe", new Date(new java.util.Date().getTime()), false);
         int expectedRowAffected = 1;
         int result = queryTemplate.run(new UpdateQuery() {
             @Override
@@ -131,7 +138,7 @@ public class QueryTemplateTest {
 
     @Test
     public void deleteTest() throws Exception {
-        final Person person = new Person(1, "John", new Date(new java.util.Date().getTime()));
+        final Person person = new Person(1, "John", new Date(new java.util.Date().getTime()), false);
         int expectedRowAffected = 1;
         int result = queryTemplate.run(new UpdateQuery() {
             @Override
@@ -185,5 +192,25 @@ public class QueryTemplateTest {
         Assert.assertEquals(expectedSize, persons.size());
         Assert.assertEquals("John", persons.get(0).getName());
         Assert.assertEquals("Doe", persons.get(1).getName());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void saveBrokenPersonShouldThrowAnException() throws Exception {
+      queryTemplate.run(new UpdateQuery() {
+        @Override
+        public Integer perform(DatabaseConnection connection) throws Exception {
+          return connection.persist(new NotEntityPerson());
+        }
+      }, true);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void savingAnEntityWithoutPrimaryKeyShouldThrowAnException() throws Exception {
+      queryTemplate.run(new UpdateQuery() {
+        @Override
+        public Integer perform(DatabaseConnection connection) throws Exception {
+          return connection.persist(new PersonWithoutPrimaryKey());
+        }
+      }, true);
     }
 }

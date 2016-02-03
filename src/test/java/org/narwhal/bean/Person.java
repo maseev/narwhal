@@ -20,13 +20,17 @@ public class Person {
 
     private Date birthday;
 
+    @Column("EMPLOYED")
+    private boolean employed;
+
     public Person() {
     }
 
-    public Person(Integer id, String name, Date birthday) {
+    public Person(Integer id, String name, Date birthday, boolean employed) {
         this.id = id;
         this.name = name;
         this.birthday = birthday;
+        this.employed = employed;
     }
 
     public Integer getId() {
@@ -52,4 +56,12 @@ public class Person {
     public void setBirthday(Date birthday) {
         this.birthday = birthday;
     }
+
+  public boolean isEmployed() {
+    return employed;
+  }
+
+  public void setEmployed(boolean employed) {
+    this.employed = employed;
+  }
 }
