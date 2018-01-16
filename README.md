@@ -13,7 +13,7 @@ Features
 --------
 * Provides convenient methods for manipulating entities (persist, read, update, delete).
 * Supports basic transaction management.
-* Supports connection pool;
+* Supports connection pools;
 * Provides an easy way to map class fields to table columns through annotations;
 * Automatically creates instances of the mapped classes;
 * Includes a small set of convenient methods that provide an easy way to use prepared statements to query database;
@@ -35,18 +35,18 @@ Notice, that your entity class must have a default constructor, so Narwhal would
 
 ```java
 @Entity("PERSON")
-public class Person {
-    @Id
-	@Column(value = "ID")
-	private int id;
+public class Person { 
+  @Id
+  @Column(value = "ID")
+  private int id;
 
-	@Column("NAME")
-	private String name;
+  @Column("NAME")
+  private String name;
 
-	@Column("BIRTHDAY")
-	private Date birthday;
+  @Column("BIRTHDAY")
+  private Date birthday;
 
-	// getter and setter methods
+  // getter and setter methods
 }
 ```
 
@@ -55,19 +55,19 @@ The example above could be rewritten as:
 ```java
 @Entity
 public class Person {
-    @Id
-	private int id;
+  @Id
+  private int id;
 
-	private String name;
+  private String name;
 
-	private Date birthday;
+  private Date birthday;
 }
 ```
 
-Notice, in the example above you don't even have to to create any getters and setters for class fields.
+Notice, in the example above you don't even have to create any getters and setters for class fields.
 Narwhal uses reflection API in order to get and set class's fields values if there's no getter or setter.
 	
-The following example illustrates creating a connection to PostgreSQL database:
+The following example illustrates creating a connection to a PostgreSQL database:
 
 ```java
 HikariDataSource dataSource = new HikariDataSource();
@@ -83,38 +83,38 @@ Performing a query to retrieve a single entity:
 
 ```java
 Person person = queryTemplate.run(new Query<Person>() {
-	@Override
-	public Person perform(DatabaseConnection connection) throws Exception {
-		return connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, 1);
-	}
+  @Override
+  public Person perform(DatabaseConnection connection) throws Exception {
+    return connection.executeQuery("SELECT * FROM Person WHERE id = ?", Person.class, 1);
+  }
 }, false);
-```	
+```
 
 Performing a query to retrieve a list of entities:
 
 ```java
 List<Person> people = queryTemplate.run(new Query<List<Person>>() {
-    @Override
-    public List<Person> perform(DatabaseConnection connection) {
-        return connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
-    }
+  @Override
+  public List<Person> perform(DatabaseConnection connection) {
+    return connection.executeQueryForCollection("SELECT * FROM Person", Person.class);
+  }
 }, false);
-```	
+```
 		
 Here is an example of using insert, update and delete queries:
 
 ```java
 queryTemplate.run(new UpdateQuery() {
-	@Override
-	public Integer perform(DatabaseConnection connection) throws Exception {
-		int affectedRows = 0;
+  @Override
+  public Integer perform(DatabaseConnection connection) throws Exception {
+    int affectedRows = 0;
 
-		affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 5, "Test", new Date(new java.util.Date().getTime()));
-		affectedRows += connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "TestTest", "Test");
-		affectedRows += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
+    affectedRows += connection.executeUpdate("INSERT INTO Person (id, name, birthday) VALUES (?, ?, ?)", 5, "Test", new Date(new java.util.Date().getTime()));
+    affectedRows += connection.executeUpdate("UPDATE Person SET name = ? WHERE name = ?", "TestTest", "Test");
+    affectedRows += connection.executeUpdate("DELETE FROM Person WHERE name = ?", "TestTest");
 
-		return affectedRows;
-	}
+    return affectedRows;
+  }
 }, true);
 ```
 
@@ -122,15 +122,15 @@ The following example illustrates a process of using convenient methods such as 
 
 ```java
 queryTemplate.run(new UpdateQuery() {
-	@Override
-	public Integer perform(DatabaseConnection connection) throws Exception {
-		int affectedRows = 0;
+  @Override
+  public Integer perform(DatabaseConnection connection) throws Exception {
+    int affectedRows = 0;
 
-		affectedRows += connection.persist(new Person(1, "John");
-		affectedRows += connection.update(person1);
-		affectedRows += connection.delete(person2);
+    affectedRows += connection.persist(new Person(1, "John");
+    affectedRows += connection.update(person1);
+    affectedRows += connection.delete(person2);
 
-		return affectedRows;
-	}
+    return affectedRows;
+  }
 }, true);
 ```
