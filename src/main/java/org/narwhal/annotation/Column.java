@@ -15,10 +15,10 @@ import java.lang.annotation.Target;
 @Retention(value = RetentionPolicy.RUNTIME)
 public @interface Column {
 
-    /**
-     * Returns the database column name.
-     *
-     * @return Database column name.
-     * */
-    String value() default "";
+  /**
+   * Returns the database column name.
+   *
+   * @return Database column name.
+   */
+  String value() default "";
 }

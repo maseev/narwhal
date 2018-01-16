@@ -15,11 +15,11 @@ import java.lang.annotation.Target;
 @Retention(value = RetentionPolicy.RUNTIME)
 public @interface Entity {
 
-    /**
-     * Returns a table name that maps
-     * to the particular entity.
-     *
-     * @return Table name.
-     * */
-    String value() default "";
+  /**
+   * Returns a table name that maps
+   * to the particular entity.
+   *
+   * @return Table name.
+   */
+  String value() default "";
 }
